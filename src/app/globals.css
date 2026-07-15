@@ -1,26 +1,173 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-cream: #F5F0E8;
+  --color-cream-dark: #EDE6D8;
+  --color-bone: #FAF7F2;
+  --color-rust: #8B2500;
+  --color-rust-light: #A63200;
+  --color-rust-dark: #6E1E00;
+  --color-charcoal: #2C2C2C;
+  --color-charcoal-light: #4A4A4A;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-logo: var(--font-pacifico);
+  --font-heading: var(--font-oswald);
+  --font-body: var(--font-playfair);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background-color: var(--color-rust);
+  color: var(--color-cream);
+}
+
+/* Textura de papel sutil */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Bordes ornamentados dobles */
+.border-ornamental {
+  border: 2px solid var(--color-charcoal);
+  outline: 1px solid var(--color-charcoal);
+  outline-offset: 4px;
+}
+
+.border-ornamental-thin {
+  border: 1px solid var(--color-charcoal);
+  outline: 1px solid var(--color-charcoal);
+  outline-offset: 3px;
+}
+
+/* Sombra sólida retro */
+.shadow-retro {
+  box-shadow: 4px 4px 0px 0px var(--color-charcoal);
+}
+
+.shadow-retro-sm {
+  box-shadow: 3px 3px 0px 0px var(--color-charcoal);
+}
+
+.shadow-retro-rust {
+  box-shadow: 4px 4px 0px 0px var(--color-rust);
+}
+
+/* Botón retro */
+.btn-retro {
+  position: relative;
+  background-color: var(--color-rust);
+  color: var(--color-cream);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease;
+  box-shadow: 4px 4px 0px 0px var(--color-charcoal);
+}
+
+.btn-retro:hover {
+  box-shadow: 6px 6px 0px 0px var(--color-charcoal);
+  transform: translate(-2px, -2px);
+}
+
+.btn-retro:active {
+  box-shadow: 2px 2px 0px 0px var(--color-charcoal);
+  transform: translate(2px, 2px);
+}
+
+.btn-retro-outline {
+  position: relative;
+  background-color: transparent;
+  color: var(--color-charcoal);
+  border: 2px solid var(--color-charcoal);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease;
+  box-shadow: 4px 4px 0px 0px var(--color-charcoal);
+}
+
+.btn-retro-outline:hover {
+  background-color: var(--color-charcoal);
+  color: var(--color-cream);
+  box-shadow: 6px 6px 0px 0px var(--color-rust);
+  transform: translate(-2px, -2px);
+}
+
+/* Badge retro */
+.badge-retro {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  padding: 0.25rem 0.75rem;
+  border: 1.5px solid currentColor;
+}
+
+/* Separador ornamental */
+.divider-ornamental {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.divider-ornamental::before,
+.divider-ornamental::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-charcoal);
+  opacity: 0.2;
+}
+
+/* Tarjeta de producto retro */
+.card-retro {
+  background-color: var(--color-bone);
+  border: 1.5px solid var(--color-charcoal);
+  transition: all 0.2s ease;
+}
+
+.card-retro:hover {
+  box-shadow: 5px 5px 0px 0px var(--color-charcoal);
+  transform: translate(-2px, -2px);
+}
+
+/* Input retro */
+.input-retro {
+  background-color: var(--color-bone);
+  border: 1.5px solid var(--color-charcoal);
+  font-family: var(--font-body);
+  transition: all 0.15s ease;
+}
+
+.input-retro:focus {
+  outline: none;
+  box-shadow: 3px 3px 0px 0px var(--color-rust);
+  border-color: var(--color-rust);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-charcoal);
+  border: 1px solid var(--color-cream);
 }
