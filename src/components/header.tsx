@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, ShoppingBag, Search } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useCartStore } from "@/store/cart"
+import { CartBadge } from "@/components/cart-badge"
 
 const navLinks = [
   { href: "/catalogo", label: "Todo" },
@@ -15,7 +15,6 @@ const navLinks = [
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const itemCount = useCartStore((s) => s.getItemCount())
 
   return (
     <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-sm">
@@ -51,11 +50,7 @@ export function Header() {
               className="relative p-2 text-charcoal/60 hover:text-rust transition-colors"
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
-              {itemCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rust text-[10px] font-bold text-cream font-[family-name:var(--font-oswald)]">
-                  {itemCount}
-                </span>
-              )}
+              <CartBadge />
             </Link>
             <button
               className="md:hidden p-2 text-charcoal"

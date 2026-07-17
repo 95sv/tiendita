@@ -4,6 +4,7 @@ import { useParams } from "next/navigation"
 import Image from "next/image"
 import { getProductBySlug } from "@/lib/products"
 import { ProductInfo } from "@/components/product-info"
+import { ImageZoom } from "@/components/image-zoom"
 import { notFound } from "next/navigation"
 import { useState } from "react"
 
@@ -20,13 +21,11 @@ export default function ProductPage() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid gap-10 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="aspect-[3/4] relative card-retro overflow-hidden bg-cream-dark">
-            <Image
+          <div className="aspect-[3/4] card-retro overflow-hidden bg-cream-dark">
+            <ImageZoom
               src={product.images[selectedImage]}
               alt={product.name}
-              fill
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
               priority
             />
           </div>
