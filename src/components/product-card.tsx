@@ -29,13 +29,19 @@ export function ProductCard({ product }: ProductCardProps) {
               -{product.discount}%
             </span>
           )}
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          {product.images[0] ? (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-cream-dark">
+              <span className="font-[family-name:var(--font-pacifico)] text-2xl text-charcoal/20">LL</span>
+            </div>
+          )}
         </div>
 
         <div className="mt-3 space-y-1">

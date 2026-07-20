@@ -2,6 +2,7 @@ import type { Product } from "@/types"
 
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
 const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
+const REGION_ID = process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || ""
 
 interface StoreProduct {
   id: string
@@ -19,17 +20,41 @@ interface StoreProduct {
     title: string
     options?: { id: string; option_id: string; value: string }[]
     prices?: { id: string; amount: number; currency_code: string }[]
+    calculated_price?: {
+      calculated_amount: number
+      original_amount: number
+      currency_code: string
+    } | null
     inventory_quantity?: number
   }[]
 }
 
 function medusaToProduct(p: StoreProduct): Product {
   const firstVariant = p.variants?.[0]
-  const firstPrice = firstVariant?.prices?.[0]?.amount ?? 0
+
+  const firstPrice =
+    firstVariant?.calculated_price?.calculated_amount ??
+    firstVariant?.prices?.[0]?.amount ??
+    0
+
   const allPrices = (p.variants || [])
-    .flatMap((v) => (v.prices || []).map((pr) => pr.amount))
+    .flatMap((v) => {
+      if (v.calculated_price?.calculated_amount) return [v.calculated_price.calculated_amount]
+      return (v.prices || []).map((pr) => pr.amount)
+    })
     .filter((n) => n > 0)
   const maxPrice = allPrices.length > 1 ? Math.max(...allPrices) : undefined
+
+  const allOriginalPrices = (p.variants || [])
+    .flatMap((v) => {
+      if (v.calculated_price?.original_amount) return [v.calculated_price.original_amount]
+      return []
+    })
+    .filter((n) => n > 0)
+  const hasDiscount =
+    allOriginalPrices.length > 0 &&
+    allPrices.length > 0 &&
+    Math.max(...allOriginalPrices) > Math.max(...allPrices)
 
   const sizeOption = p.options?.find((o) =>
     ["talle", "size", "talles", "sizes"].includes(o.title.toLowerCase())
@@ -58,7 +83,8 @@ function medusaToProduct(p: StoreProduct): Product {
     name: p.title,
     description: p.description || "",
     price: firstPrice,
-    originalPrice: maxPrice && maxPrice > firstPrice ? maxPrice : undefined,
+    originalPrice:
+      hasDiscount ? Math.max(...allOriginalPrices) : undefined,
     images: (p.images || []).map((img) => img.url).filter(Boolean),
     category,
     sizes,
@@ -66,24 +92,32 @@ function medusaToProduct(p: StoreProduct): Product {
     slug: p.handle,
     isNew: false,
     discount:
-      maxPrice && maxPrice > firstPrice
-        ? Math.round(((maxPrice - firstPrice) / maxPrice) * 100)
+      hasDiscount
+        ? Math.round(
+            ((Math.max(...allOriginalPrices) - firstPrice) /
+              Math.max(...allOriginalPrices)) *
+              100
+          )
         : undefined,
   }
 }
 
 export async function getAllProducts(): Promise<Product[]> {
-  const res = await fetch(
-    `${MEDUSA_URL}/store/products?limit=100&fields=id,title,description,handle,status,thumbnail,collection_id,collection,images,options,variants`,
-    {
-      headers: { "x-publishable-api-key": API_KEY },
-    }
-  )
+  try {
+    const res = await fetch(
+      `${MEDUSA_URL}/store/products?limit=100${REGION_ID ? `&region_id=${REGION_ID}` : ""}`,
+      {
+        headers: { "x-publishable-api-key": API_KEY },
+      }
+    )
 
-  if (!res.ok) return []
+    if (!res.ok) return []
 
-  const data = await res.json()
-  return (data.products || []).map(medusaToProduct)
+    const data = await res.json()
+    return (data.products || []).map(medusaToProduct)
+  } catch {
+    return []
+  }
 }
 
 export async function getProductsByCategory(

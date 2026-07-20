@@ -43,35 +43,43 @@ export default function ProductPage() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid gap-10 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="aspect-[3/4] card-retro overflow-hidden bg-cream-dark">
-            <ImageZoom
-              src={product!.images[selectedImage]}
-              alt={product!.name}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-            />
-          </div>
-          {product!.images.length > 1 && (
-            <div className="flex gap-2">
-              {product!.images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedImage(i)}
-                  className={`relative aspect-square w-20 overflow-hidden border-2 transition-all ${
-                    selectedImage === i
-                      ? "border-rust"
-                      : "border-charcoal/10 hover:border-charcoal/30"
-                  }`}
-                >
-                  <Image
-                    src={img}
-                    alt={`${product!.name} ${i + 1}`}
-                    fill
-                    sizes="80px"
-                    className="object-cover"
-                  />
-                </button>
-              ))}
+          {product!.images.length > 0 ? (
+            <>
+              <div className="aspect-[3/4] card-retro overflow-hidden bg-cream-dark">
+                <ImageZoom
+                  src={product!.images[selectedImage]}
+                  alt={product!.name}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              </div>
+              {product!.images.length > 1 && (
+                <div className="flex gap-2">
+                  {product!.images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`relative aspect-square w-20 overflow-hidden border-2 transition-all ${
+                        selectedImage === i
+                          ? "border-rust"
+                          : "border-charcoal/10 hover:border-charcoal/30"
+                      }`}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product!.name} ${i + 1}`}
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="aspect-[3/4] card-retro overflow-hidden bg-cream-dark flex items-center justify-center">
+              <span className="font-[family-name:var(--font-pacifico)] text-4xl text-charcoal/20">LL</span>
             </div>
           )}
         </div>
