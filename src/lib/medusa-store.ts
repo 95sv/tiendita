@@ -51,24 +51,17 @@ export function medusaToProduct(p: MedusaProduct): Product {
   }
 }
 
-let cachedProducts: Product[] | null = null
-
 export async function getAllProducts(): Promise<Product[]> {
-  if (cachedProducts) return cachedProducts
-
   const res = await fetch(`${MEDUSA_URL}/store/products?limit=100`, {
     headers: {
       "x-publishable-api-key": API_KEY,
     },
-    next: { revalidate: 60 },
   })
 
   if (!res.ok) return []
 
   const data = await res.json()
-  const products = (data.products || []).map(medusaToProduct)
-  cachedProducts = products
-  return products
+  return (data.products || []).map(medusaToProduct)
 }
 
 export async function getProductsByCategory(

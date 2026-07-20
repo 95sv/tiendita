@@ -100,6 +100,8 @@ export async function fetchProduct(id: string): Promise<MedusaProduct> {
   return data.product
 }
 
+const SALES_CHANNEL_ID = "sc_01KY07XRRAQ1HTB8XDMF1G9XZK"
+
 export async function createProduct(body: {
   title: string
   description?: string
@@ -118,7 +120,18 @@ export async function createProduct(body: {
     method: "POST",
     body: JSON.stringify(body),
   })
+  await assignToSalesChannel(data.product.id)
   return data.product
+}
+
+async function assignToSalesChannel(productId: string): Promise<void> {
+  await adminFetch(
+    `/admin/sales-channels/${SALES_CHANNEL_ID}/products`,
+    {
+      method: "POST",
+      body: JSON.stringify({ add: [productId] }),
+    }
+  )
 }
 
 export async function updateProduct(
