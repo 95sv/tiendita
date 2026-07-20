@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import { Pacifico, Oswald, Playfair_Display } from "next/font/google"
 import "./globals.css"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import { ClientLayout } from "@/components/client-layout"
 
 const pacifico = Pacifico({
   weight: "400",
@@ -36,9 +35,7 @@ export default function RootLayout({
       className={`${pacifico.variable} ${oswald.variable} ${playfair.variable}`}
     >
       <body className="min-h-screen flex flex-col antialiased">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   )
