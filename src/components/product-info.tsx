@@ -13,7 +13,7 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [selectedColor, setSelectedColor] = useState<Color>(product.colors[0])
+  const [selectedColor, setSelectedColor] = useState<Color>(product.colors[0] || { name: "Único", hex: "#000000" })
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
