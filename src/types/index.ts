@@ -6,6 +6,8 @@ export interface Product {
   originalPrice?: number
   images: string[]
   category: "hombres" | "mujeres" | "ofertas"
+  collectionTitle?: string
+  collectionHandle?: string
   subcategory?: string
   sizes: string[]
   colors: Color[]

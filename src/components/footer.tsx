@@ -5,13 +5,11 @@ const footerLinks = {
     { href: "/catalogo", label: "Catálogo" },
     { href: "/hombres", label: "Hombres" },
     { href: "/mujeres", label: "Mujeres" },
-    { href: "/ofertas", label: "Ofertas" },
   ],
   ayuda: [
-    { href: "/#faq", label: "Preguntas frecuentes" },
-    { href: "/#envios", label: "Envíos" },
-    { href: "/#devoluciones", label: "Devoluciones" },
-    { href: "/#contacto", label: "Contacto" },
+    { href: "/contacto", label: "Contacto" },
+    { href: "/envios", label: "Envíos" },
+    { href: "/devoluciones", label: "Devoluciones" },
   ],
 }
 

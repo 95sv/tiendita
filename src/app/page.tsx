@@ -10,13 +10,11 @@ import type { Product } from "@/types"
 
 export default function Home() {
   const [newProducts, setNewProducts] = useState<Product[]>([])
-  const [saleProducts, setSaleProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getAllProducts().then((all) => {
       setNewProducts(all.slice(0, 4))
-      setSaleProducts(all.filter((p) => p.discount && p.discount > 0).slice(0, 4))
       setLoading(false)
     })
   }, [])
@@ -62,8 +60,8 @@ export default function Home() {
               Ver catálogo
               <ArrowRight size={16} />
             </Link>
-            <Link href="/ofertas" className="btn-retro-outline inline-flex items-center justify-center gap-2 px-10 py-4 text-sm">
-              Ofertas
+            <Link href="/contacto" className="btn-retro-outline inline-flex items-center justify-center gap-2 px-10 py-4 text-sm">
+              Contacto
             </Link>
           </div>
         </motion.div>
@@ -121,33 +119,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Ofertas */}
-      {!loading && saleProducts.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-rust">
-                Descuentos
-              </span>
-              <h2 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal mt-1">
-                Ofertas
-              </h2>
-            </div>
-            <Link
-              href="/ofertas"
-              className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.15em] text-charcoal/50 hover:text-rust transition-colors flex items-center gap-1"
-            >
-              Ver ofertas <ArrowRight size={12} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-            {saleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Categorías */}
       <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">

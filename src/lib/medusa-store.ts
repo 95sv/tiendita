@@ -87,6 +87,8 @@ function medusaToProduct(p: StoreProduct): Product {
       hasDiscount ? Math.max(...allOriginalPrices) : undefined,
     images: (p.images || []).map((img) => img.url).filter(Boolean),
     category,
+    collectionTitle: p.collection?.title || undefined,
+    collectionHandle: p.collection?.handle || undefined,
     sizes,
     colors,
     slug: p.handle,
