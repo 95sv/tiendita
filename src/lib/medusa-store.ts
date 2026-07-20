@@ -12,7 +12,7 @@ interface StoreProduct {
   status: string
   thumbnail: string | null
   collection_id: string | null
-  collection?: { id: string; title: string } | null
+  collection?: { id: string; title: string; handle: string } | null
   images: { id: string; url: string }[]
   options: { id: string; title: string; values: { id: string; value: string }[] }[]
   variants: {
