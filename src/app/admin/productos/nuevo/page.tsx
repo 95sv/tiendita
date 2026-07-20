@@ -64,44 +64,47 @@ export default function NuevoProductoPage() {
     setColors(colors.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!form.name || !form.price || images.length === 0 || sizes.length === 0) {
-      alert("Completá todos los campos obligatorios")
+    if (!form.name || !form.price) {
+      alert("Completá nombre y precio")
       return
     }
 
-    const slug = form.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-
-    addProduct({
-      id: Date.now().toString(),
-      name: form.name,
-      description: form.description,
-      price: Number(form.price),
-      originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
-      images,
-      category: form.category,
-      subcategory: form.subcategory || undefined,
-      sizes,
-      colors: colors.length > 0 ? colors : [{ name: "Único", hex: "#000000" }],
-      slug,
-      isNew: true,
-      discount: form.originalPrice
-        ? Math.round(
-            ((Number(form.originalPrice) - Number(form.price)) /
-              Number(form.originalPrice)) *
-              100
-          )
-        : undefined,
-      stock: Number(form.stock),
-      active: form.active,
-    })
-
-    router.push("/admin/productos")
+    setSubmitting(true)
+    try {
+      await addProduct({
+        id: Date.now().toString(),
+        name: form.name,
+        description: form.description,
+        price: Number(form.price),
+        originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
+        images,
+        category: form.category,
+        subcategory: form.subcategory || undefined,
+        sizes: sizes.length > 0 ? sizes : ["Único"],
+        colors: colors.length > 0 ? colors : [{ name: "Único", hex: "#000000" }],
+        slug: form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+        isNew: true,
+        discount: form.originalPrice
+          ? Math.round(
+              ((Number(form.originalPrice) - Number(form.price)) /
+                Number(form.originalPrice)) *
+                100
+            )
+          : undefined,
+        stock: Number(form.stock),
+        active: form.active,
+      })
+      router.push("/admin/productos")
+    } catch (err: any) {
+      alert("Error: " + err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -394,8 +397,8 @@ export default function NuevoProductoPage() {
 
         {/* Submit */}
         <div className="flex gap-4">
-          <button type="submit" className="btn-retro px-8 py-3 text-sm">
-            Crear producto
+          <button type="submit" disabled={submitting} className="btn-retro px-8 py-3 text-sm disabled:opacity-50">
+            {submitting ? "Creando..." : "Crear producto"}
           </button>
           <Link
             href="/admin/productos"

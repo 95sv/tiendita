@@ -4,11 +4,22 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { ProductCard } from "@/components/product-card"
-import { getNewProducts, getSaleProducts } from "@/lib/products"
+import { getAllProducts } from "@/lib/medusa-store"
+import { useEffect, useState } from "react"
+import type { Product } from "@/types"
 
 export default function Home() {
-  const newProducts = getNewProducts().slice(0, 4)
-  const saleProducts = getSaleProducts().slice(0, 4)
+  const [newProducts, setNewProducts] = useState<Product[]>([])
+  const [saleProducts, setSaleProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getAllProducts().then((all) => {
+      setNewProducts(all.slice(0, 4))
+      setSaleProducts(all.filter((p) => p.discount && p.discount > 0).slice(0, 4))
+      setLoading(false)
+    })
+  }, [])
 
   return (
     <>
@@ -76,11 +87,19 @@ export default function Home() {
             Ver todo <ArrowRight size={12} />
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-          {newProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
+              Cargando productos...
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+            {newProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Banner */}
@@ -104,7 +123,7 @@ export default function Home() {
       </section>
 
       {/* Ofertas */}
-      {saleProducts.length > 0 && (
+      {!loading && saleProducts.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
             <div>

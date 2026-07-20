@@ -38,7 +38,7 @@ export default function EditProductoPage() {
         description: product.description,
         price: product.price.toString(),
         originalPrice: product.originalPrice?.toString() || "",
-        category: product.category,
+        category: product.category as "hombres" | "mujeres" | "ofertas",
         subcategory: product.subcategory || "",
         stock: product.stock.toString(),
         active: product.active,

@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, Plus, ArrowLeft } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { LayoutDashboard, Package, Plus, ArrowLeft, LogOut } from "lucide-react"
+import { useEffect, useState } from "react"
+import { adminLogin, adminLogout, isAdminLoggedIn } from "@/lib/medusa"
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -10,19 +12,121 @@ const links = [
   { href: "/admin/productos/nuevo", label: "Nuevo producto", icon: Plus },
 ]
 
+function LoginScreen({ onLogin }: { onLogin: () => void }) {
+  const [email, setEmail] = useState("admin@laloya.com")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+    try {
+      await adminLogin(email, password)
+      onLogin()
+    } catch (err: any) {
+      setError(err.message || "Error al iniciar sesión")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-cream flex items-center justify-center">
+      <div className="card-retro p-8 w-full max-w-md">
+        <h1 className="font-[family-name:var(--font-pacifico)] text-3xl text-rust text-center mb-2">
+          La Loya
+        </h1>
+        <p className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-charcoal/40 text-center mb-8">
+          Panel de administración
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-retro w-full px-4 py-3 text-sm mt-2"
+              required
+            />
+          </div>
+          <div>
+            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-retro w-full px-4 py-3 text-sm mt-2"
+              required
+            />
+          </div>
+          {error && (
+            <p className="text-xs text-red-600 font-[family-name:var(--font-oswald)] uppercase tracking-wider">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-retro w-full py-3 text-sm"
+          >
+            {loading ? "Ingresando..." : "Ingresar"}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    setChecked(true)
+    setLoggedIn(isAdminLoggedIn())
+  }, [])
+
+  const handleLogout = () => {
+    adminLogout()
+    setLoggedIn(false)
+    router.push("/")
+  }
+
+  if (!checked) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <p className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal/40">
+          Cargando...
+        </p>
+      </div>
+    )
+  }
+
+  if (!loggedIn) {
+    return <LoginScreen onLogin={() => setLoggedIn(true)} />
+  }
 
   return (
     <div className="flex min-h-screen bg-cream">
-      {/* Sidebar */}
       <aside className="w-64 bg-charcoal text-cream flex flex-col">
         <div className="p-6 border-b border-cream/10">
-          <Link href="/" className="flex items-center gap-2 text-cream/50 hover:text-cream transition-colors text-xs font-[family-name:var(--font-oswald)] uppercase tracking-wider">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-cream/50 hover:text-cream transition-colors text-xs font-[family-name:var(--font-oswald)] uppercase tracking-wider"
+          >
             <ArrowLeft size={14} />
             Volver a la tienda
           </Link>
@@ -53,9 +157,18 @@ export default function AdminLayout({
             )
           })}
         </nav>
+
+        <div className="p-4 border-t border-cream/10">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-wider text-cream/40 hover:text-red-400 transition-colors w-full"
+          >
+            <LogOut size={16} />
+            Cerrar sesión
+          </button>
+        </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 p-8">{children}</main>
     </div>
   )
