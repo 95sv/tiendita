@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { fetchPromotions, createPromotion, deletePromotion, type MedusaPromotion } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
-import { Tag, Plus, Trash2, X, Loader2 } from "lucide-react"
+import { Tag, Plus, Trash2, X, Loader2, Download } from "lucide-react"
+import { exportToCSV } from "@/lib/export-csv"
 
 const typeLabels: Record<string, string> = {
   percentage: "Porcentaje",
@@ -176,10 +177,25 @@ export default function PromocionesPage() {
             {promotions.length} promociones activas
           </p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-retro px-6 py-3 text-sm flex items-center gap-2">
-          <Plus size={16} />
-          Nueva promocion
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => exportToCSV(promotions.map((p) => ({
+              Codigo: p.code,
+              Tipo: typeLabels[p.type] || p.type,
+              Valor: p.type === "percentage" ? `${p.value}%` : p.value,
+              Inicio: p.starts_at ? new Date(p.starts_at).toLocaleDateString("es-AR") : "Sin fecha",
+              Fin: p.ends_at ? new Date(p.ends_at).toLocaleDateString("es-AR") : "Sin fecha",
+            })), "promociones-la-loya")}
+            className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
+          >
+            <Download size={14} />
+            Exportar CSV
+          </button>
+          <button onClick={() => setShowForm(true)} className="btn-retro px-6 py-3 text-sm flex items-center gap-2">
+            <Plus size={16} />
+            Nueva promocion
+          </button>
+        </div>
       </div>
 
       {promotions.length === 0 ? (

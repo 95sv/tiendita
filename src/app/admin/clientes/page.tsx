@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { formatPrice } from "@/lib/utils"
 import { fetchCustomers, type MedusaCustomer } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
-import { Users } from "lucide-react"
+import { Users, Download } from "lucide-react"
+import { exportToCSV } from "@/lib/export-csv"
 
 export default function ClientesPage() {
   const [customers, setCustomers] = useState<MedusaCustomer[]>([])
@@ -33,13 +34,28 @@ export default function ClientesPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
-          Clientes
-        </h1>
-        <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
-          {customers.length} clientes registrados
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
+            Clientes
+          </h1>
+          <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
+            {customers.length} clientes registrados
+          </p>
+        </div>
+        <button
+          onClick={() => exportToCSV(customers.map((c) => ({
+            Nombre: `${c.first_name || ""} ${c.last_name || ""}`.trim() || "Sin nombre",
+            Email: c.email,
+            Pedidos: c.orders_count,
+            "Gasto total": c.total_spent,
+            Registro: new Date(c.created_at).toLocaleDateString("es-AR"),
+          })), "clientes-la-loya")}
+          className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
+        >
+          <Download size={14} />
+          Exportar CSV
+        </button>
       </div>
 
       <div className="overflow-x-auto">

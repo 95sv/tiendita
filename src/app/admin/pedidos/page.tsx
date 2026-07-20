@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { formatPrice } from "@/lib/utils"
 import { fetchOrders, type MedusaOrder } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
-import { ShoppingCart, Eye, X } from "lucide-react"
+import { ShoppingCart, Eye, X, Download } from "lucide-react"
+import { exportToCSV } from "@/lib/export-csv"
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   pending: { label: "Pendiente", color: "bg-yellow-100 text-yellow-800" },
@@ -125,13 +126,28 @@ export default function PedidosPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
-          Pedidos
-        </h1>
-        <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
-          {orders.length} pedidos totales
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
+            Pedidos
+          </h1>
+          <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
+            {orders.length} pedidos totales
+          </p>
+        </div>
+        <button
+          onClick={() => exportToCSV(orders.map((o) => ({
+            "#": o.display_id,
+            Cliente: o.email,
+            Estado: statusLabels[o.status]?.label || o.status,
+            Total: o.total,
+            Fecha: new Date(o.created_at).toLocaleDateString("es-AR"),
+          })), "pedidos-la-loya")}
+          className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
+        >
+          <Download size={14} />
+          Exportar CSV
+        </button>
       </div>
 
       <div className="overflow-x-auto">
