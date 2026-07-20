@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Package, Plus, ArrowLeft, LogOut } from "lucide-react"
+import { LayoutDashboard, Package, Plus, ArrowLeft, LogOut, ShoppingCart, Users, Tag, BadgeDollarSign, RotateCcw } from "lucide-react"
 import { useEffect, useState } from "react"
 import { adminLogin, adminLogout, isAdminLoggedIn } from "@/lib/medusa"
 
@@ -10,6 +10,11 @@ const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/productos", label: "Productos", icon: Package },
   { href: "/admin/productos/nuevo", label: "Nuevo producto", icon: Plus },
+  { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
+  { href: "/admin/clientes", label: "Clientes", icon: Users },
+  { href: "/admin/promociones", label: "Promociones", icon: Tag },
+  { href: "/admin/precios", label: "Listas de precio", icon: BadgeDollarSign },
+  { href: "/admin/devoluciones", label: "Devoluciones", icon: RotateCcw },
 ]
 
 function LoginScreen({ onLogin }: { onLogin: () => void }) {

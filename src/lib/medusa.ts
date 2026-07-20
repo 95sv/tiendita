@@ -224,3 +224,143 @@ export async function storeFetchCollections(): Promise<MedusaCollection[]> {
   }).then((r) => r.json())
   return data.product_categories || []
 }
+
+export interface MedusaOrder {
+  id: string
+  display_id: number
+  status: string
+  fulfillment_status: string
+  payment_status: string
+  total: number
+  currency_code: string
+  email: string
+  created_at: string
+  updated_at: string
+  customer?: { id: string; email: string; first_name: string; last_name: string } | null
+  shipping_address?: { city: string; country_code: string; address_1: string } | null
+  items: {
+    id: string
+    title: string
+    quantity: number
+    unit_price: number
+    total: number
+  }[]
+}
+
+export async function fetchOrders(): Promise<MedusaOrder[]> {
+  const data = await adminFetch<{ orders: MedusaOrder[]; count: number }>(
+    "/admin/orders?limit=100"
+  )
+  return data.orders || []
+}
+
+export async function fetchOrder(id: string): Promise<MedusaOrder> {
+  const data = await adminFetch<{ order: MedusaOrder }>(`/admin/orders/${id}`)
+  return data.order
+}
+
+export interface MedusaPromotion {
+  id: string
+  code: string
+  type: string
+  value: number
+  is_automatic: boolean
+  starts_at: string | null
+  ends_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export async function fetchPromotions(): Promise<MedusaPromotion[]> {
+  const data = await adminFetch<{ promotions: MedusaPromotion[]; count: number }>(
+    "/admin/promotions?limit=100"
+  )
+  return data.promotions || []
+}
+
+export async function createPromotion(body: {
+  code: string
+  type: "percentage" | "fixed"
+  value: number
+  is_automatic?: boolean
+  starts_at?: string
+  ends_at?: string
+}): Promise<MedusaPromotion> {
+  const data = await adminFetch<{ promotion: MedusaPromotion }>("/admin/promotions", {
+    method: "POST",
+    body: JSON.stringify(body),
+  })
+  return data.promotion
+}
+
+export async function deletePromotion(id: string): Promise<void> {
+  await adminFetch(`/admin/promotions/${id}`, { method: "DELETE" })
+}
+
+export interface MedusaPriceList {
+  id: string
+  name: string
+  description: string | null
+  type: string
+  status: string
+  starts_at: string | null
+  ends_at: string | null
+  created_at: string
+}
+
+export async function fetchPriceLists(): Promise<MedusaPriceList[]> {
+  const data = await adminFetch<{ price_lists: MedusaPriceList[]; count: number }>(
+    "/admin/price-lists?limit=100"
+  )
+  return data.price_lists || []
+}
+
+export async function createPriceList(body: {
+  name: string
+  description?: string
+  type: string
+  starts_at?: string
+  ends_at?: string
+}): Promise<MedusaPriceList> {
+  const data = await adminFetch<{ price_list: MedusaPriceList }>("/admin/price-lists", {
+    method: "POST",
+    body: JSON.stringify(body),
+  })
+  return data.price_list
+}
+
+export async function deletePriceList(id: string): Promise<void> {
+  await adminFetch(`/admin/price-lists/${id}`, { method: "DELETE" })
+}
+
+export interface MedusaCustomer {
+  id: string
+  email: string
+  first_name: string | null
+  last_name: string | null
+  orders_count: number
+  total_spent: number
+  created_at: string
+}
+
+export async function fetchCustomers(): Promise<MedusaCustomer[]> {
+  const data = await adminFetch<{ customers: MedusaCustomer[]; count: number }>(
+    "/admin/customers?limit=100"
+  )
+  return data.customers || []
+}
+
+export interface MedusaReturn {
+  id: string
+  status: string
+  order_id: string
+  created_at: string
+  items: { id: string; quantity: number; reason_id: string | null }[]
+}
+
+export async function fetchReturns(): Promise<MedusaReturn[]> {
+  const data = await adminFetch<{ returns: MedusaReturn[]; count: number }>(
+    "/admin/returns?limit=100"
+  )
+  return data.returns || []
+}
