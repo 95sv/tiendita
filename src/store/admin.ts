@@ -53,7 +53,7 @@ interface AdminStore {
 
 function medusaToAdmin(p: MedusaProduct): AdminProduct {
   const price = p.variants?.[0]?.prices?.[0]?.amount || 0
-  const allPrices = p.variants?.flatMap((v) => v.prices.map((pr) => pr.amount)) || []
+  const allPrices = (p.variants || []).flatMap((v) => (v.prices || []).map((pr) => pr.amount)).filter((n) => n > 0)
   const maxPrice = allPrices.length > 1 ? Math.max(...allPrices) : undefined
 
   const sizeOption = p.options?.find((o) =>
@@ -66,10 +66,10 @@ function medusaToAdmin(p: MedusaProduct): AdminProduct {
   )
   const colors = colorOption?.values?.map((v) => ({ name: v.value, hex: "#000000" })) || []
 
-  const totalStock = p.variants?.reduce(
+  const totalStock = (p.variants || []).reduce(
     (sum, v) => sum + (v.inventory_quantity || 0),
     0
-  ) || 0
+  ) || 50
 
   return {
     id: p.id,
