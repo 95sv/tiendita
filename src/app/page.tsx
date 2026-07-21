@@ -112,13 +112,13 @@ export default function Home() {
       </section>
 
       {/* Banner */}
-      <section className="bg-charcoal py-16">
+      <section className="bg-charcoal py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <img src="/logo-cream.png" alt="La Loya" className="h-[100px] w-auto mx-auto" />
-          <p className="mt-4 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.2em] text-cream/50 max-w-md mx-auto">
+          <img src="/logo-cream.png" alt="La Loya" className="h-[60px] w-auto mx-auto" />
+          <p className="mt-2 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.2em] text-cream/50 max-w-md mx-auto">
             Diseño que se siente. Calidad que se nota. Bahía Blanca, Argentina.
           </p>
-          <div className="mt-6 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em]">
+          <div className="mt-3 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em]">
             <span className="w-8 h-px bg-cream/20" />
             Lun — Sáb 7am a 8pm
             <span className="w-8 h-px bg-cream/20" />
