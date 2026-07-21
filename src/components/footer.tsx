@@ -20,15 +20,13 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
-              <span className="font-[family-name:var(--font-cormorant)] text-3xl text-rust">
-                La Loya
-              </span>
+              <img src="/logo-cream.png" alt="La Loya" className="h-[40px] w-auto block" />
               <p className="mt-3 text-sm text-cream/50 leading-relaxed max-w-xs">
                 Ropa de diseño y café de especialidad. Bahía Blanca, Argentina.
               </p>
               <div className="mt-4 flex items-center gap-2 text-xs text-cream/40 font-[family-name:var(--font-libre)] uppercase tracking-[0.15em]">
                 <span className="w-8 h-px bg-cream/20" />
-                Vie. 19 — 17 hs
+                Lun — Sáb 7am a 8pm
                 <span className="w-8 h-px bg-cream/20" />
               </div>
             </div>

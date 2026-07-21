@@ -120,7 +120,7 @@ export default function Home() {
           </p>
           <div className="mt-6 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em]">
             <span className="w-8 h-px bg-cream/20" />
-            Vie. 19 — 17 hs
+            Lun — Sáb 7am a 8pm
             <span className="w-8 h-px bg-cream/20" />
           </div>
         </div>
