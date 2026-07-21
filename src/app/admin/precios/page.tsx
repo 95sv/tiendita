@@ -32,7 +32,7 @@ function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceLi
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-cream card-retro max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-[family-name:var(--font-oswald)] text-xl uppercase tracking-[0.05em] text-charcoal">
+          <h2 className="font-[family-name:var(--font-libre)] text-xl uppercase tracking-[0.05em] text-charcoal">
             Nueva lista de precios
           </h2>
           <button onClick={onClose} className="text-charcoal/40 hover:text-charcoal transition-colors">
@@ -41,7 +41,7 @@ function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceLi
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Nombre
             </label>
             <input
@@ -54,7 +54,7 @@ function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceLi
             />
           </div>
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Descripcion
             </label>
             <input
@@ -66,7 +66,7 @@ function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceLi
             />
           </div>
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Tipo
             </label>
             <select
@@ -79,7 +79,7 @@ function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceLi
             </select>
           </div>
           {error && (
-            <p className="text-xs text-red-600 font-[family-name:var(--font-oswald)] uppercase tracking-wider">{error}</p>
+            <p className="text-xs text-red-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">{error}</p>
           )}
           <button
             type="submit"
@@ -117,7 +117,7 @@ export default function PreciosPage() {
   if (loading) {
     return (
       <div className="text-center py-20">
-        <p className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
+        <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
           Cargando listas de precios...
         </p>
       </div>
@@ -128,10 +128,10 @@ export default function PreciosPage() {
     <>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
+          <h1 className="font-[family-name:var(--font-libre)] text-3xl uppercase tracking-[0.05em] text-charcoal">
             Listas de precio
           </h1>
-          <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
+          <p className="mt-2 font-[family-name:var(--font-libre)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
             {priceLists.length} listas configuradas
           </p>
         </div>
@@ -148,11 +148,11 @@ export default function PreciosPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-charcoal/10">
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Nombre</th>
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Tipo</th>
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Estado</th>
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Inicio</th>
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Fin</th>
+                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Nombre</th>
+                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Tipo</th>
+                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Estado</th>
+                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Inicio</th>
+                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Fin</th>
                 <th className="py-3 px-4"></th>
               </tr>
             </thead>
@@ -160,23 +160,23 @@ export default function PreciosPage() {
               {priceLists.map((list) => (
                 <tr key={list.id} className="border-b border-charcoal/5 hover:bg-charcoal/[0.02] transition-colors">
                   <td className="py-3 px-4">
-                    <p className="font-[family-name:var(--font-oswald)] text-sm text-charcoal">{list.name}</p>
+                    <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal">{list.name}</p>
                     {list.description && (
-                      <p className="font-[family-name:var(--font-oswald)] text-xs text-charcoal/40 mt-0.5">{list.description}</p>
+                      <p className="font-[family-name:var(--font-libre)] text-xs text-charcoal/40 mt-0.5">{list.description}</p>
                     )}
                   </td>
                   <td className="py-3 px-4 hidden sm:table-cell">
-                    <span className="font-[family-name:var(--font-oswald)] text-xs text-charcoal/60 uppercase">{list.type}</span>
+                    <span className="font-[family-name:var(--font-libre)] text-xs text-charcoal/60 uppercase">{list.type}</span>
                   </td>
                   <td className="py-3 px-4 hidden sm:table-cell">
-                    <span className={`inline-block px-2 py-0.5 text-xs font-[family-name:var(--font-oswald)] uppercase ${list.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}>
+                    <span className={`inline-block px-2 py-0.5 text-xs font-[family-name:var(--font-libre)] uppercase ${list.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}>
                       {list.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-oswald)] text-xs text-charcoal/40">
+                  <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-libre)] text-xs text-charcoal/40">
                     {list.starts_at ? new Date(list.starts_at).toLocaleDateString("es-AR") : "Sin fecha"}
                   </td>
-                  <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-oswald)] text-xs text-charcoal/40">
+                  <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-libre)] text-xs text-charcoal/40">
                     {list.ends_at ? new Date(list.ends_at).toLocaleDateString("es-AR") : "Sin fecha"}
                   </td>
                   <td className="py-3 px-4">

@@ -1,22 +1,17 @@
 import type { Metadata } from "next"
-import { Pacifico, Oswald, Playfair_Display } from "next/font/google"
+import { Cormorant_Garamond, Libre_Franklin } from "next/font/google"
 import "./globals.css"
 import { ClientLayout } from "@/components/client-layout"
 
-const pacifico = Pacifico({
-  weight: "400",
+const cormorant = Cormorant_Garamond({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-pacifico",
+  variable: "--font-cormorant",
 })
 
-const oswald = Oswald({
+const libreFranklin = Libre_Franklin({
   subsets: ["latin"],
-  variable: "--font-oswald",
-})
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-libre",
 })
 
 export const metadata: Metadata = {
@@ -32,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${pacifico.variable} ${oswald.variable} ${playfair.variable}`}
+      className={`${cormorant.variable} ${libreFranklin.variable}`}
     >
       <body className="min-h-screen flex flex-col antialiased">
         <ClientLayout>{children}</ClientLayout>

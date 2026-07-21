@@ -27,12 +27,12 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 text-center">
-        <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
+        <h1 className="font-[family-name:var(--font-libre)] text-3xl uppercase tracking-[0.05em] text-charcoal">
           No hay productos
         </h1>
         <Link
           href="/catalogo"
-          className="mt-6 inline-flex items-center gap-2 font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.1em] text-charcoal/50 hover:text-rust transition-colors"
+          className="mt-6 inline-flex items-center gap-2 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.1em] text-charcoal/50 hover:text-rust transition-colors"
         >
           <ArrowLeft size={14} />
           Volver al catalogo
@@ -96,10 +96,10 @@ export default function CheckoutPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10">
-        <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-rust">
+        <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
           Checkout
         </span>
-        <h1 className="font-[family-name:var(--font-oswald)] text-4xl uppercase tracking-[0.05em] text-charcoal mt-1">
+        <h1 className="font-[family-name:var(--font-libre)] text-4xl uppercase tracking-[0.05em] text-charcoal mt-1">
           Finalizar compra
         </h1>
       </div>
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="space-y-6">
             <section>
-              <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal mb-4">
+              <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal mb-4">
                 Datos personales
               </h2>
               <div className="space-y-3">
@@ -139,7 +139,7 @@ export default function CheckoutPage() {
             </section>
 
             <section>
-              <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal mb-4">
+              <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal mb-4">
                 Direccion de envio
               </h2>
               <div className="space-y-3">
@@ -183,7 +183,7 @@ export default function CheckoutPage() {
             </section>
 
             <section>
-              <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal mb-4">
+              <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal mb-4">
                 Medio de pago
               </h2>
               <div className="space-y-2">
@@ -196,10 +196,10 @@ export default function CheckoutPage() {
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="accent-rust"
                   />
-                  <span className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal">
+                  <span className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal">
                     Mercado Pago
                   </span>
-                  <span className="font-[family-name:var(--font-oswald)] text-[10px] text-charcoal/40 ml-auto">
+                  <span className="font-[family-name:var(--font-libre)] text-[10px] text-charcoal/40 ml-auto">
                     Tarjeta, efectivo, transferencia
                   </span>
                 </label>
@@ -212,10 +212,10 @@ export default function CheckoutPage() {
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="accent-rust"
                   />
-                  <span className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal">
+                  <span className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal">
                     Transferencia bancaria
                   </span>
-                  <span className="font-[family-name:var(--font-oswald)] text-[10px] text-charcoal/40 ml-auto">
+                  <span className="font-[family-name:var(--font-libre)] text-[10px] text-charcoal/40 ml-auto">
                     Coordinar por WhatsApp
                   </span>
                 </label>
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
             </section>
 
             {error && (
-              <p className="font-[family-name:var(--font-oswald)] text-xs text-rust uppercase tracking-wider">
+              <p className="font-[family-name:var(--font-libre)] text-xs text-rust uppercase tracking-wider">
                 {error}
               </p>
             )}
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
 
           <div className="lg:col-span-1">
             <div className="card-retro sticky top-24 p-6">
-              <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal">
+              <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
                 Tu pedido
               </h2>
               <div className="mt-4 space-y-3">
@@ -241,14 +241,14 @@ export default function CheckoutPage() {
                     className="flex gap-3 text-sm"
                   >
                     <div className="flex-1">
-                      <p className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-wider text-charcoal">
+                      <p className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider text-charcoal">
                         {item.product.name}
                       </p>
-                      <p className="text-[10px] text-charcoal/40 font-[family-name:var(--font-oswald)] uppercase tracking-wider">
+                      <p className="text-[10px] text-charcoal/40 font-[family-name:var(--font-libre)] uppercase tracking-wider">
                         {item.size} x{item.quantity}
                       </p>
                     </div>
-                    <span className="font-[family-name:var(--font-oswald)] text-xs font-medium text-charcoal">
+                    <span className="font-[family-name:var(--font-libre)] text-xs font-medium text-charcoal">
                       {formatPrice(item.product.price * item.quantity)}
                     </span>
                   </div>
@@ -257,21 +257,21 @@ export default function CheckoutPage() {
               <div className="mt-4 border-t border-charcoal/10 pt-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-charcoal/50">Subtotal</span>
-                  <span className="font-[family-name:var(--font-oswald)] text-charcoal">
+                  <span className="font-[family-name:var(--font-libre)] text-charcoal">
                     {formatPrice(getTotal())}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-charcoal/50">Envio</span>
-                  <span className="text-charcoal/30 text-xs font-[family-name:var(--font-oswald)] uppercase">
+                  <span className="text-charcoal/30 text-xs font-[family-name:var(--font-libre)] uppercase">
                     A coordinar
                   </span>
                 </div>
                 <div className="border-t border-charcoal/10 pt-2 flex justify-between text-base font-bold">
-                  <span className="font-[family-name:var(--font-oswald)] uppercase tracking-wider text-charcoal">
+                  <span className="font-[family-name:var(--font-libre)] uppercase tracking-wider text-charcoal">
                     Total
                   </span>
-                  <span className="font-[family-name:var(--font-oswald)] text-charcoal">
+                  <span className="font-[family-name:var(--font-libre)] text-charcoal">
                     {formatPrice(getTotal())}
                   </span>
                 </div>

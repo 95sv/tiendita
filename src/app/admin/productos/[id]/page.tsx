@@ -137,12 +137,12 @@ export default function EditProductoPage() {
       <div className="mb-8">
         <Link
           href="/admin/productos"
-          className="inline-flex items-center gap-1 text-xs text-charcoal/40 hover:text-charcoal font-[family-name:var(--font-oswald)] uppercase tracking-wider mb-4 transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-charcoal/40 hover:text-charcoal font-[family-name:var(--font-libre)] uppercase tracking-wider mb-4 transition-colors"
         >
           <ArrowLeft size={12} />
           Volver a productos
         </Link>
-        <h1 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal">
+        <h1 className="font-[family-name:var(--font-libre)] text-3xl uppercase tracking-[0.05em] text-charcoal">
           Editar producto
         </h1>
       </div>
@@ -150,12 +150,12 @@ export default function EditProductoPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información básica */}
         <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal">
+          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
             Información básica
           </h2>
 
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Nombre *
             </label>
             <input
@@ -168,7 +168,7 @@ export default function EditProductoPage() {
           </div>
 
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Descripción
             </label>
             <textarea
@@ -180,7 +180,7 @@ export default function EditProductoPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Categoría *
               </label>
               <select
@@ -196,7 +196,7 @@ export default function EditProductoPage() {
               </select>
             </div>
             <div>
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Subcategoría
               </label>
               <input
@@ -211,7 +211,7 @@ export default function EditProductoPage() {
 
         {/* Imágenes */}
         <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal">
+          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
             Imágenes *
           </h2>
 
@@ -252,13 +252,13 @@ export default function EditProductoPage() {
 
         {/* Precios y stock */}
         <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal">
+          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
             Precios y stock
           </h2>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Precio ($) *
               </label>
               <input
@@ -271,7 +271,7 @@ export default function EditProductoPage() {
               />
             </div>
             <div>
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Precio original ($)
               </label>
               <input
@@ -283,7 +283,7 @@ export default function EditProductoPage() {
               />
             </div>
             <div>
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Stock *
               </label>
               <input
@@ -298,7 +298,7 @@ export default function EditProductoPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Estado
             </label>
             <button
@@ -314,7 +314,7 @@ export default function EditProductoPage() {
                 }`}
               />
             </button>
-            <span className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-wider text-charcoal/60">
+            <span className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider text-charcoal/60">
               {form.active ? "Activo" : "Inactivo"}
             </span>
           </div>
@@ -322,7 +322,7 @@ export default function EditProductoPage() {
 
         {/* Talles */}
         <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal">
+          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
             Talles *
           </h2>
 
@@ -349,7 +349,7 @@ export default function EditProductoPage() {
               {sizes.map((size) => (
                 <span
                   key={size}
-                  className="inline-flex items-center gap-1 bg-charcoal text-cream px-3 py-1 text-xs font-[family-name:var(--font-oswald)] uppercase tracking-wider"
+                  className="inline-flex items-center gap-1 bg-charcoal text-cream px-3 py-1 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider"
                 >
                   {size}
                   <button
@@ -367,13 +367,13 @@ export default function EditProductoPage() {
 
         {/* Colores */}
         <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] text-charcoal">
+          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
             Colores
           </h2>
 
           <div className="flex gap-2 items-end">
             <div className="flex-1">
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Nombre
               </label>
               <input
@@ -385,7 +385,7 @@ export default function EditProductoPage() {
               />
             </div>
             <div>
-              <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Color
               </label>
               <input
@@ -409,7 +409,7 @@ export default function EditProductoPage() {
               {colors.map((color, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-2 bg-charcoal text-cream px-3 py-1 text-xs font-[family-name:var(--font-oswald)] uppercase tracking-wider"
+                  className="inline-flex items-center gap-2 bg-charcoal text-cream px-3 py-1 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider"
                 >
                   <span
                     className="w-3 h-3 rounded-full border border-cream/30"

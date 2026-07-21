@@ -28,11 +28,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-[family-name:var(--font-oswald)] text-2xl uppercase tracking-[0.05em] text-charcoal">
+        <h1 className="font-[family-name:var(--font-libre)] text-2xl uppercase tracking-[0.05em] text-charcoal">
           {product.name}
         </h1>
         <div className="mt-3 flex items-center gap-3">
-          <span className="font-[family-name:var(--font-oswald)] text-xl font-semibold text-charcoal">
+          <span className="font-[family-name:var(--font-libre)] text-xl font-semibold text-charcoal">
             {formatPrice(product.price)}
           </span>
           {product.originalPrice && (
@@ -50,7 +50,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </p>
 
       <div>
-        <label className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.2em] text-charcoal/50">
+        <label className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.2em] text-charcoal/50">
           Color — {selectedColor.name}
         </label>
         <div className="mt-3 flex gap-2">
@@ -71,7 +71,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       <div>
-        <label className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.2em] text-charcoal/50">
+        <label className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.2em] text-charcoal/50">
           Talle {selectedSize ? `— ${selectedSize}` : ""}
         </label>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -79,7 +79,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <button
               key={size}
               onClick={() => setSelectedSize(size)}
-              className={`h-10 min-w-[40px] border-1.5 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-wider transition-all ${
+              className={`h-10 min-w-[40px] border-1.5 text-sm font-[family-name:var(--font-libre)] uppercase tracking-wider transition-all ${
                 selectedSize === size
                   ? "bg-charcoal text-cream border-charcoal shadow-retro-sm"
                   : "bg-cream border-charcoal/20 hover:border-charcoal text-charcoal"
@@ -90,14 +90,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
           ))}
         </div>
         {!selectedSize && (
-          <p className="mt-2 text-xs text-rust font-[family-name:var(--font-oswald)] uppercase tracking-wider">
+          <p className="mt-2 text-xs text-rust font-[family-name:var(--font-libre)] uppercase tracking-wider">
             Seleccioná un talle
           </p>
         )}
       </div>
 
       <div>
-        <label className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.2em] text-charcoal/50">
+        <label className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.2em] text-charcoal/50">
           Cantidad
         </label>
         <div className="mt-3 flex items-center gap-3">
@@ -107,7 +107,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           >
             <Minus size={14} />
           </button>
-          <span className="w-8 text-center text-sm font-[family-name:var(--font-oswald)] font-medium">
+          <span className="w-8 text-center text-sm font-[family-name:var(--font-libre)] font-medium">
             {quantity}
           </span>
           <button
@@ -123,7 +123,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         whileTap={{ scale: 0.98 }}
         onClick={handleAddToCart}
         disabled={!selectedSize || added}
-        className={`flex h-12 w-full items-center justify-center gap-2 font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.1em] transition-all ${
+        className={`flex h-12 w-full items-center justify-center gap-2 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.1em] transition-all ${
           added
             ? "bg-green-700 text-cream shadow-retro-sm"
             : selectedSize

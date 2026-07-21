@@ -28,7 +28,7 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.15em] px-4 py-2 text-charcoal/70 hover:text-rust transition-colors"
+                className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] px-4 py-2 text-charcoal/70 hover:text-rust transition-colors"
               >
                 {link.label}
               </Link>
@@ -75,7 +75,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="font-[family-name:var(--font-oswald)] text-base uppercase tracking-[0.15em] text-charcoal/70 hover:text-rust py-3 border-b border-charcoal/5 last:border-0"
+                  className="font-[family-name:var(--font-libre)] text-base uppercase tracking-[0.15em] text-charcoal/70 hover:text-rust py-3 border-b border-charcoal/5 last:border-0"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}

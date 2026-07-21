@@ -51,29 +51,29 @@ function SuccessContent() {
           </div>
         </div>
 
-        <h1 className="font-[family-name:var(--font-pacifico)] text-3xl text-rust">
+        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl text-rust">
           Compra exitosa!
         </h1>
 
-        <p className="mt-4 font-[family-name:var(--font-oswald)] text-sm text-charcoal/60 leading-relaxed">
+        <p className="mt-4 font-[family-name:var(--font-libre)] text-sm text-charcoal/60 leading-relaxed">
           Tu pedido fue procesado correctamente. Te enviamos un email con los detalles de tu compra.
         </p>
 
         {status === "loading" && (
-          <p className="mt-4 font-[family-name:var(--font-oswald)] text-xs text-charcoal/40 animate-pulse flex items-center justify-center gap-2">
+          <p className="mt-4 font-[family-name:var(--font-libre)] text-xs text-charcoal/40 animate-pulse flex items-center justify-center gap-2">
             <Loader2 size={14} className="animate-spin" />
             Enviando confirmacion por email...
           </p>
         )}
 
         {status === "sent" && (
-          <p className="mt-4 font-[family-name:var(--font-oswald)] text-xs text-green-600">
+          <p className="mt-4 font-[family-name:var(--font-libre)] text-xs text-green-600">
             Email de confirmacion enviado!
           </p>
         )}
 
         {status === "error" && (
-          <p className="mt-4 font-[family-name:var(--font-oswald)] text-xs text-charcoal/40">
+          <p className="mt-4 font-[family-name:var(--font-libre)] text-xs text-charcoal/40">
             No pudimos enviar el email, pero tu compra se registro correctamente.
           </p>
         )}
@@ -88,7 +88,7 @@ function SuccessContent() {
           </Link>
           <Link
             href="/"
-            className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.15em] text-charcoal/40 hover:text-charcoal transition-colors"
+            className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.15em] text-charcoal/40 hover:text-charcoal transition-colors"
           >
             Volver al inicio
           </Link>
@@ -109,7 +109,7 @@ export default function CheckoutSuccessPage() {
                 <CheckCircle size={32} className="text-green-600" />
               </div>
             </div>
-            <p className="font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 animate-pulse">
+            <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal/40 animate-pulse">
               Cargando...
             </p>
           </div>

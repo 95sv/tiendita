@@ -39,15 +39,15 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
       <div className="card-retro p-8 w-full max-w-md">
-        <h1 className="font-[family-name:var(--font-pacifico)] text-3xl text-rust text-center mb-2">
+        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl text-rust text-center mb-2">
           La Loya
         </h1>
-        <p className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-charcoal/40 text-center mb-8">
+        <p className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-charcoal/40 text-center mb-8">
           Panel de administración
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Email
             </label>
             <input
@@ -59,7 +59,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
             />
           </div>
           <div>
-            <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+            <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
               Contraseña
             </label>
             <input
@@ -71,7 +71,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
             />
           </div>
           {error && (
-            <p className="text-xs text-red-600 font-[family-name:var(--font-oswald)] uppercase tracking-wider">
+            <p className="text-xs text-red-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">
               {error}
             </p>
           )}
@@ -112,7 +112,7 @@ export default function AdminLayout({
   if (!checked) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <p className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal/40">
+        <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/40">
           Cargando...
         </p>
       </div>
@@ -129,15 +129,15 @@ export default function AdminLayout({
         <div className="p-6 border-b border-cream/10">
           <Link
             href="/"
-            className="flex items-center gap-2 text-cream/50 hover:text-cream transition-colors text-xs font-[family-name:var(--font-oswald)] uppercase tracking-wider"
+            className="flex items-center gap-2 text-cream/50 hover:text-cream transition-colors text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider"
           >
             <ArrowLeft size={14} />
             Volver a la tienda
           </Link>
-          <h1 className="font-[family-name:var(--font-pacifico)] text-2xl text-rust mt-4">
+          <h1 className="font-[family-name:var(--font-cormorant)] text-2xl text-rust mt-4">
             La Loya
           </h1>
-          <span className="font-[family-name:var(--font-oswald)] text-[9px] uppercase tracking-[0.3em] text-cream/40">
+          <span className="font-[family-name:var(--font-libre)] text-[9px] uppercase tracking-[0.3em] text-cream/40">
             Panel de administración
           </span>
         </div>
@@ -149,7 +149,7 @@ export default function AdminLayout({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-wider transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-[family-name:var(--font-libre)] uppercase tracking-wider transition-all ${
                   isActive
                     ? "bg-rust text-cream"
                     : "text-cream/60 hover:text-cream hover:bg-cream/5"
@@ -165,7 +165,7 @@ export default function AdminLayout({
         <div className="p-4 border-t border-cream/10">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-wider text-cream/40 hover:text-red-400 transition-colors w-full"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-[family-name:var(--font-libre)] uppercase tracking-wider text-cream/40 hover:text-red-400 transition-colors w-full"
           >
             <LogOut size={16} />
             Cerrar sesión

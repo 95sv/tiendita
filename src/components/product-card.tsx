@@ -39,17 +39,17 @@ export function ProductCard({ product }: ProductCardProps) {
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-cream-dark">
-              <span className="font-[family-name:var(--font-pacifico)] text-2xl text-charcoal/20">LL</span>
+              <span className="font-[family-name:var(--font-cormorant)] text-2xl text-charcoal/20">LL</span>
             </div>
           )}
         </div>
 
         <div className="mt-3 space-y-1">
-          <h3 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.05em] text-charcoal group-hover:text-rust transition-colors">
+          <h3 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.05em] text-charcoal group-hover:text-rust transition-colors">
             {product.name}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="font-[family-name:var(--font-oswald)] text-sm font-semibold text-charcoal">
+            <span className="font-[family-name:var(--font-libre)] text-sm font-semibold text-charcoal">
               {formatPrice(product.price)}
             </span>
             {product.originalPrice && (

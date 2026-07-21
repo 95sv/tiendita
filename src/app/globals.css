@@ -15,9 +15,9 @@
   --color-accent-3: #BB6062;
   --color-accent-4: #AB3F43;
 
-  --font-logo: var(--font-pacifico);
-  --font-heading: var(--font-oswald);
-  --font-body: var(--font-playfair);
+  --font-logo: var(--font-cormorant);
+  --font-heading: var(--font-cormorant);
+  --font-body: var(--font-libre);
 }
 
 body {

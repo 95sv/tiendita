@@ -20,13 +20,13 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
-              <span className="font-[family-name:var(--font-pacifico)] text-3xl text-rust">
+              <span className="font-[family-name:var(--font-cormorant)] text-3xl text-rust">
                 La Loya
               </span>
               <p className="mt-3 text-sm text-cream/50 leading-relaxed max-w-xs">
                 Ropa de diseño y café de especialidad. Bahía Blanca, Argentina.
               </p>
-              <div className="mt-4 flex items-center gap-2 text-xs text-cream/40 font-[family-name:var(--font-oswald)] uppercase tracking-[0.15em]">
+              <div className="mt-4 flex items-center gap-2 text-xs text-cream/40 font-[family-name:var(--font-libre)] uppercase tracking-[0.15em]">
                 <span className="w-8 h-px bg-cream/20" />
                 Vie. 19 — 17 hs
                 <span className="w-8 h-px bg-cream/20" />
@@ -34,7 +34,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h4 className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.2em] text-cream/40 mb-4">
+              <h4 className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.2em] text-cream/40 mb-4">
                 Tienda
               </h4>
               <ul className="space-y-2">
@@ -52,7 +52,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h4 className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.2em] text-cream/40 mb-4">
+              <h4 className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.2em] text-cream/40 mb-4">
                 Ayuda
               </h4>
               <ul className="space-y-2">
@@ -74,10 +74,10 @@ export function Footer() {
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-cream/30 font-[family-name:var(--font-oswald)] uppercase tracking-[0.15em]">
+          <p className="text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.15em]">
             &copy; {new Date().getFullYear()} La Loya. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-1 text-[10px] text-cream/30 font-[family-name:var(--font-oswald)] uppercase tracking-[0.2em]">
+          <div className="flex items-center gap-1 text-[10px] text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em]">
             <span className="w-2 h-2 border border-rust rounded-full" />
             Hecho con amor en Bahía Blanca
           </div>

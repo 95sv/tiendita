@@ -29,7 +29,7 @@ export default function ProductPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center py-20">
-          <p className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
+          <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
             Cargando producto...
           </p>
         </div>
@@ -81,7 +81,7 @@ export default function ProductPage() {
             </>
           ) : (
             <div className="aspect-[3/4] card-retro overflow-hidden bg-cream-dark flex items-center justify-center">
-              <span className="font-[family-name:var(--font-pacifico)] text-4xl text-charcoal/20">LL</span>
+              <span className="font-[family-name:var(--font-cormorant)] text-4xl text-charcoal/20">LL</span>
             </div>
           )}
         </div>

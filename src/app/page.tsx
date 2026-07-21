@@ -67,11 +67,11 @@ export default function Home() {
           <img src="/logo-cream.png" alt="La Loya — Ropa & Café, Bahía Blanca" className="h-[180px] w-auto block mx-auto drop-shadow-[0_2px_24px_rgba(0,0,0,0.4)]" />
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/catalogo" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-[0.05em] bg-white/15 backdrop-blur-xl border border-white/30 text-cream rounded-sm transition-all hover:bg-white/25 hover:-translate-y-0.5">
+            <Link href="/catalogo" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-libre)] uppercase tracking-[0.05em] bg-white/15 backdrop-blur-xl border border-white/30 text-cream rounded-sm transition-all hover:bg-white/25 hover:-translate-y-0.5">
               Ver catálogo
               <ArrowRight size={16} />
             </Link>
-            <Link href="/contacto" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-[0.05em] bg-black/15 backdrop-blur-xl border border-cream/35 text-cream rounded-sm transition-all hover:bg-black/25 hover:-translate-y-0.5">
+            <Link href="/contacto" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-libre)] uppercase tracking-[0.05em] bg-black/15 backdrop-blur-xl border border-cream/35 text-cream rounded-sm transition-all hover:bg-black/25 hover:-translate-y-0.5">
               Contacto
             </Link>
           </div>
@@ -82,23 +82,23 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-rust">
+            <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
               Lo último
             </span>
-            <h2 className="font-[family-name:var(--font-oswald)] text-3xl uppercase tracking-[0.05em] text-charcoal mt-1">
+            <h2 className="font-[family-name:var(--font-libre)] text-3xl uppercase tracking-[0.05em] text-charcoal mt-1">
               Nueva Colección
             </h2>
           </div>
           <Link
             href="/catalogo"
-            className="font-[family-name:var(--font-oswald)] text-xs uppercase tracking-[0.15em] text-charcoal/50 hover:text-rust transition-colors flex items-center gap-1"
+            className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.15em] text-charcoal/50 hover:text-rust transition-colors flex items-center gap-1"
           >
             Ver todo <ArrowRight size={12} />
           </Link>
         </div>
         {loading ? (
           <div className="text-center py-12">
-            <p className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
+            <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
               Cargando productos...
             </p>
           </div>
@@ -114,16 +114,11 @@ export default function Home() {
       {/* Banner */}
       <section className="bg-charcoal py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.4em] text-cream/30">
-            ☕
-          </span>
-          <h2 className="font-[family-name:var(--font-pacifico)] text-4xl text-rust mt-4">
-            Ropa & Café
-          </h2>
-          <p className="mt-4 font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.2em] text-cream/50 max-w-md mx-auto">
+          <img src="/logo-cream.png" alt="La Loya" className="h-[100px] w-auto mx-auto" />
+          <p className="mt-4 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.2em] text-cream/50 max-w-md mx-auto">
             Diseño que se siente. Calidad que se nota. Bahía Blanca, Argentina.
           </p>
-          <div className="mt-6 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-oswald)] uppercase tracking-[0.2em]">
+          <div className="mt-6 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em]">
             <span className="w-8 h-px bg-cream/20" />
             Vie. 19 — 17 hs
             <span className="w-8 h-px bg-cream/20" />
@@ -137,10 +132,10 @@ export default function Home() {
           <Link href="/hombres" className="group card-retro relative aspect-[4/3] flex items-end p-8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
             <div className="relative z-10">
-              <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-rust">
+              <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
                 Colección
               </span>
-              <h3 className="font-[family-name:var(--font-pacifico)] text-3xl text-cream mt-1">
+              <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
                 Hombres
               </h3>
             </div>
@@ -148,10 +143,10 @@ export default function Home() {
           <Link href="/mujeres" className="group card-retro relative aspect-[4/3] flex items-end p-8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
             <div className="relative z-10">
-              <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-rust">
+              <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
                 Colección
               </span>
-              <h3 className="font-[family-name:var(--font-pacifico)] text-3xl text-cream mt-1">
+              <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
                 Mujeres
               </h3>
             </div>

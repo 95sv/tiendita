@@ -14,20 +14,20 @@ export default function ContactoPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10">
-        <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.3em] text-rust">
+        <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
           Contacto
         </span>
-        <h1 className="font-[family-name:var(--font-oswald)] text-4xl uppercase tracking-[0.05em] text-charcoal mt-1">
+        <h1 className="font-[family-name:var(--font-libre)] text-4xl uppercase tracking-[0.05em] text-charcoal mt-1">
           Hablemos
         </h1>
-        <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/50 max-w-lg">
+        <p className="mt-2 font-[family-name:var(--font-libre)] text-sm text-charcoal/50 max-w-lg">
           Tenes alguna pregunta sobre nuestros productos, pedidos o algo mas? Escribinos y te respondemos a la brevedad.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-12">
         <div>
-          <h2 className="font-[family-name:var(--font-oswald)] text-lg uppercase tracking-[0.05em] text-charcoal mb-6">
+          <h2 className="font-[family-name:var(--font-libre)] text-lg uppercase tracking-[0.05em] text-charcoal mb-6">
             Enviá tu consulta
           </h2>
           {sent ? (
@@ -35,10 +35,10 @@ export default function ContactoPage() {
               <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <Send size={20} className="text-green-600" />
               </div>
-              <h3 className="font-[family-name:var(--font-oswald)] text-lg uppercase text-charcoal">
+              <h3 className="font-[family-name:var(--font-libre)] text-lg uppercase text-charcoal">
                 Mensaje enviado
               </h3>
-              <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/50">
+              <p className="mt-2 font-[family-name:var(--font-libre)] text-sm text-charcoal/50">
                 Te vamos a responder lo antes posible. Gracias por contactarnos!
               </p>
               <button
@@ -51,7 +51,7 @@ export default function ContactoPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+                <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                   Nombre
                 </label>
                 <input
@@ -62,7 +62,7 @@ export default function ContactoPage() {
                 />
               </div>
               <div>
-                <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+                <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                   Email
                 </label>
                 <input
@@ -73,7 +73,7 @@ export default function ContactoPage() {
                 />
               </div>
               <div>
-                <label className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+                <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                   Mensaje
                 </label>
                 <textarea
@@ -92,16 +92,16 @@ export default function ContactoPage() {
         </div>
 
         <div className="space-y-6">
-          <h2 className="font-[family-name:var(--font-oswald)] text-lg uppercase tracking-[0.05em] text-charcoal mb-6">
+          <h2 className="font-[family-name:var(--font-libre)] text-lg uppercase tracking-[0.05em] text-charcoal mb-6">
             Informacion del local
           </h2>
           <div className="card-retro p-5 flex items-start gap-4">
             <MapPin size={20} className="text-rust mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal">
+              <h3 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal">
                 Direccion
               </h3>
-              <p className="font-[family-name:var(--font-oswald)] text-sm text-charcoal/50 mt-1">
+              <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal/50 mt-1">
                 Bahia Blanca, Buenos Aires, Argentina
               </p>
             </div>
@@ -109,10 +109,10 @@ export default function ContactoPage() {
           <div className="card-retro p-5 flex items-start gap-4">
             <Clock size={20} className="text-rust mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal">
+              <h3 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal">
                 Horario
               </h3>
-              <p className="font-[family-name:var(--font-oswald)] text-sm text-charcoal/50 mt-1">
+              <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal/50 mt-1">
                 Viernes 19 hs
               </p>
             </div>
@@ -120,10 +120,10 @@ export default function ContactoPage() {
           <div className="card-retro p-5 flex items-start gap-4">
             <Mail size={20} className="text-rust mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-[family-name:var(--font-oswald)] text-sm uppercase tracking-wider text-charcoal">
+              <h3 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal">
                 Email
               </h3>
-              <p className="font-[family-name:var(--font-oswald)] text-sm text-charcoal/50 mt-1">
+              <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal/50 mt-1">
                 info@laloya.com
               </p>
             </div>
