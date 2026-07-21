@@ -19,13 +19,8 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-sm">
       <div className="border-b border-charcoal/10">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex flex-col items-center">
-            <span className="font-[family-name:var(--font-pacifico)] text-3xl text-rust tracking-wide">
-              La Loya
-            </span>
-            <span className="font-[family-name:var(--font-oswald)] text-[9px] uppercase tracking-[0.3em] text-charcoal/60 -mt-1">
-              Ropa & Café
-            </span>
+          <Link href="/" className="flex items-center transition-transform hover:scale-105 hover:opacity-80">
+            <img src="/logo-wordmark-rust.png" alt="La Loya" className="h-[34px] w-auto block" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
