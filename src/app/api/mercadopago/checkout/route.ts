@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       total,
     }).catch(console.error)
 
-    return NextResponse.json({ url: result.init_point })
+    return NextResponse.json({ url: result.sandbox_init_point || result.init_point })
   } catch (error) {
     console.error("MercadoPago error:", error)
     return NextResponse.json(
