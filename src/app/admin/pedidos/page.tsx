@@ -35,7 +35,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   in_process: { label: "En proceso", color: "bg-orange-100 text-orange-800" },
 }
 
-function OrderDetail({ order, onClose }: { order: SupabaseOrder; onClose: () => void }) {
+function OrderDetail({ order, onClose, onStatusChange }: { order: SupabaseOrder; onClose: () => void; onStatusChange: (id: string, status: string) => void }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-cream card-retro max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
@@ -81,6 +81,30 @@ function OrderDetail({ order, onClose }: { order: SupabaseOrder; onClose: () => 
                   return <span className={`inline-block px-2 py-0.5 text-xs font-[family-name:var(--font-oswald)] uppercase ${s.color}`}>{s.label}</span>
                 })()}
               </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-cream-dark/50">
+            <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">
+              Cambiar estado
+            </span>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[
+                { value: "approved", label: "Aprobado", color: "bg-green-100 text-green-800 hover:bg-green-200" },
+                { value: "pending", label: "Pendiente", color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" },
+                { value: "rejected", label: "Rechazado", color: "bg-red-100 text-red-800 hover:bg-red-200" },
+                { value: "canceled", label: "Cancelado", color: "bg-red-100 text-red-800 hover:bg-red-200" },
+                { value: "refunded", label: "Reembolsado", color: "bg-purple-100 text-purple-800 hover:bg-purple-200" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  disabled={order.status === opt.value}
+                  onClick={() => onStatusChange(order.id, opt.value)}
+                  className={`font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-wider px-3 py-1.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed ${opt.color}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -130,6 +154,18 @@ export default function PedidosPage() {
   const [orders, setOrders] = useState<SupabaseOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState<SupabaseOrder | null>(null)
+
+  const handleStatusChange = async (id: string, status: string) => {
+    await fetch("/api/orders", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    })
+    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o))
+    if (selectedOrder?.id === id) {
+      setSelectedOrder((prev) => prev ? { ...prev, status } : null)
+    }
+  }
 
   useEffect(() => {
     fetch("/api/orders")
@@ -234,7 +270,7 @@ export default function PedidosPage() {
         </table>
       </div>
 
-      {selectedOrder && <OrderDetail order={selectedOrder} onClose={() => setSelectedOrder(null)} />}
+      {selectedOrder && <OrderDetail order={selectedOrder} onClose={() => setSelectedOrder(null)} onStatusChange={handleStatusChange} />}
     </>
   )
 }
