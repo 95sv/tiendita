@@ -224,3 +224,5 @@ Las promociones se crean en MedusaJS pero el checkout actual usa MercadoPago dir
 | Supabase Dashboard | https://supabase.com/dashboard/project/qtwivutgmrwiielyqoqp |
 | Vercel Dashboard | https://vercel.com/dashboard |
 | GitHub Repositorio | https://github.com/95sv/tiendita |
+
+<!-- Last updated: 2026-07-21 13:38 -->
