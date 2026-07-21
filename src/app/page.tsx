@@ -4,7 +4,6 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { ProductCard } from "@/components/product-card"
-import { getAllProducts } from "@/lib/medusa-store"
 import { useEffect, useState } from "react"
 import type { Product } from "@/types"
 
@@ -13,10 +12,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getAllProducts().then((all) => {
-      setNewProducts(all.slice(0, 4))
-      setLoading(false)
-    })
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((all: Product[]) => {
+        setNewProducts(all.slice(0, 4))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   return (

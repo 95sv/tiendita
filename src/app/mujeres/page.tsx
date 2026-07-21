@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { ProductCard } from "@/components/product-card"
-import { getAllProducts } from "@/lib/medusa-store"
 import type { Product } from "@/types"
 
 export default function MujeresPage() {
@@ -10,10 +9,13 @@ export default function MujeresPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getAllProducts().then((all) => {
-      setProducts(all.filter((p) => p.category === "mujeres"))
-      setLoading(false)
-    })
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((all: Product[]) => {
+        setProducts(all.filter((p) => p.category === "mujeres"))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   return (

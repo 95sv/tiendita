@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { ProductCard } from "@/components/product-card"
-import { getAllProducts } from "@/lib/medusa-store"
 import type { Product } from "@/types"
 
 export default function OfertasPage() {
@@ -10,10 +9,13 @@ export default function OfertasPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getAllProducts().then((all) => {
-      setProducts(all.filter((p) => p.discount && p.discount > 0))
-      setLoading(false)
-    })
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((all: Product[]) => {
+        setProducts(all.filter((p) => p.discount && p.discount > 0))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   return (

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { ProductCard } from "@/components/product-card"
-import { getAllProducts } from "@/lib/medusa-store"
 import type { Product } from "@/types"
 
 const categories = [
@@ -20,10 +19,13 @@ export default function CatalogoPage() {
   const [activeCategory, setActiveCategory] = useState("all")
 
   useEffect(() => {
-    getAllProducts().then((p) => {
-      setProducts(p)
-      setLoading(false)
-    })
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((p: Product[]) => {
+        setProducts(p)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   const filtered = activeCategory === "all"

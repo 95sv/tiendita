@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation"
 import Image from "next/image"
-import { getAllProducts } from "@/lib/medusa-store"
 import { ProductInfo } from "@/components/product-info"
 import { ImageZoom } from "@/components/image-zoom"
 import { notFound } from "next/navigation"
@@ -16,11 +15,14 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0)
 
   useEffect(() => {
-    getAllProducts().then((all) => {
-      const found = all.find((p) => p.slug === params.slug)
-      setProduct(found || null)
-      setLoading(false)
-    })
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((all: Product[]) => {
+        const found = all.find((p) => p.slug === params.slug)
+        setProduct(found || null)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [params.slug])
 
   if (loading) {
