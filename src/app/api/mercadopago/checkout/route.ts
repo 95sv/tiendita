@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Preference } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
+import { supabase } from "@/lib/supabase"
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,8 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = req.headers.get("origin") || "https://tiendita-weld.vercel.app"
+    const externalRef = `order_${Date.now()}`
+    const total = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0)
 
     const preference = new Preference(mpClient)
     const result = await preference.create({
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
         },
         auto_return: "approved",
         notification_url: `${origin}/api/webhooks/mercadopago`,
-        external_reference: `order_${Date.now()}`,
+        external_reference: externalRef,
         statement_descriptor: "LA LOYA",
         metadata: {
           customer_name: name,
@@ -45,8 +48,33 @@ export async function POST(req: NextRequest) {
           customer_postal_code: postalCode,
           customer_province: province,
           customer_phone: phone,
+          items: JSON.stringify(items.map((item: { name: string; size?: string; quantity: number; price: number }) => ({
+            name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+            quantity: item.quantity,
+            price: item.price,
+          }))),
         },
       },
+    })
+
+    await supabase.from("orders").insert({
+      external_reference: externalRef,
+      status: "pending",
+      customer_name: name,
+      customer_email: email,
+      customer_phone: phone,
+      customer_address: address,
+      customer_city: city,
+      customer_province: province,
+      customer_postal_code: postalCode,
+      items: items.map((item: { name: string; size?: string; quantity: number; price: number }) => ({
+        name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      total,
+      currency: "ARS",
+      payment_method: "",
     })
 
     return NextResponse.json({ url: result.init_point })

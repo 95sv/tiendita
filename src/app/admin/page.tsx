@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useAdminStore } from "@/store/admin"
-import { fetchOrders, fetchCustomers, fetchPromotions } from "@/lib/medusa"
+import { fetchCustomers, fetchPromotions } from "@/lib/medusa"
 import { Package, DollarSign, ShoppingCart, Users, Tag, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
@@ -14,7 +14,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadProducts()
-    fetchOrders().then((o) => setOrderCount(o.length)).catch(() => {})
+    fetch("/api/orders").then((r) => r.json()).then((o) => setOrderCount(o.length)).catch(() => {})
     fetchCustomers().then((c) => setCustomerCount(c.length)).catch(() => {})
     fetchPromotions().then((p) => setPromoCount(p.length)).catch(() => {})
   }, [loadProducts])
