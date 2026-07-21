@@ -2,20 +2,38 @@
 
 import { useEffect, useState } from "react"
 import { formatPrice } from "@/lib/utils"
-import { fetchCustomers, type MedusaCustomer } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
 import { Users, Download } from "lucide-react"
 import { exportToCSV } from "@/lib/export-csv"
 
+interface Customer {
+  email: string
+  name: string
+  phone: string
+  orders_count: number
+  total_spent: number
+  last_order: string
+  last_status: string
+}
+
+const statusLabels: Record<string, { label: string; color: string }> = {
+  pending: { label: "Pendiente", color: "bg-yellow-100 text-yellow-800" },
+  approved: { label: "Aprobado", color: "bg-green-100 text-green-800" },
+  rejected: { label: "Rechazado", color: "bg-red-100 text-red-800" },
+}
+
 export default function ClientesPage() {
-  const [customers, setCustomers] = useState<MedusaCustomer[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchCustomers().then((data) => {
-      setCustomers(data)
-      setLoading(false)
-    })
+    fetch("/api/customers")
+      .then((r) => r.json())
+      .then((data: Customer[]) => {
+        setCustomers(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -29,7 +47,7 @@ export default function ClientesPage() {
   }
 
   if (customers.length === 0) {
-    return <EmptyState icon={Users} title="Sin clientes" description="Los clientes que se registren en tu tienda apareceran aqui." />
+    return <EmptyState icon={Users} title="Sin clientes" description="Los clientes que compren en tu tienda apareceran aqui." />
   }
 
   return (
@@ -40,16 +58,18 @@ export default function ClientesPage() {
             Clientes
           </h1>
           <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 uppercase tracking-[0.1em]">
-            {customers.length} clientes registrados
+            {customers.length} clientes
           </p>
         </div>
         <button
           onClick={() => exportToCSV(customers.map((c) => ({
-            Nombre: `${c.first_name || ""} ${c.last_name || ""}`.trim() || "Sin nombre",
+            Nombre: c.name || "Sin nombre",
             Email: c.email,
+            Telefono: c.phone || "",
             Pedidos: c.orders_count,
             "Gasto total": c.total_spent,
-            Registro: new Date(c.created_at).toLocaleDateString("es-AR"),
+            "Ultimo pedido": new Date(c.last_order).toLocaleDateString("es-AR"),
+            Estado: statusLabels[c.last_status]?.label || c.last_status,
           })), "clientes-la-loya")}
           className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
         >
@@ -64,19 +84,23 @@ export default function ClientesPage() {
             <tr className="border-b border-charcoal/10">
               <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Nombre</th>
               <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Email</th>
+              <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Telefono</th>
               <th className="text-center py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Pedidos</th>
               <th className="text-right py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Gasto total</th>
-              <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Registro</th>
+              <th className="text-left py-3 px-4 font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Ultimo pedido</th>
             </tr>
           </thead>
           <tbody>
             {customers.map((customer) => (
-              <tr key={customer.id} className="border-b border-charcoal/5 hover:bg-charcoal/[0.02] transition-colors">
+              <tr key={customer.email} className="border-b border-charcoal/5 hover:bg-charcoal/[0.02] transition-colors">
                 <td className="py-3 px-4 font-[family-name:var(--font-oswald)] text-sm text-charcoal">
-                  {`${customer.first_name || ""} ${customer.last_name || ""}`.trim() || "Sin nombre"}
+                  {customer.name || "Sin nombre"}
                 </td>
                 <td className="py-3 px-4 font-[family-name:var(--font-oswald)] text-sm text-charcoal/60">
                   {customer.email}
+                </td>
+                <td className="py-3 px-4 font-[family-name:var(--font-oswald)] text-sm text-charcoal/40 hidden sm:table-cell">
+                  {customer.phone || "-"}
                 </td>
                 <td className="py-3 px-4 text-center font-[family-name:var(--font-oswald)] text-sm text-charcoal hidden sm:table-cell">
                   {customer.orders_count}
@@ -85,7 +109,7 @@ export default function ClientesPage() {
                   {formatPrice(customer.total_spent)}
                 </td>
                 <td className="py-3 px-4 font-[family-name:var(--font-oswald)] text-xs text-charcoal/40 hidden md:table-cell">
-                  {new Date(customer.created_at).toLocaleDateString("es-AR")}
+                  {new Date(customer.last_order).toLocaleDateString("es-AR")}
                 </td>
               </tr>
             ))}
