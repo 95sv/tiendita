@@ -127,7 +127,7 @@ export default function Home() {
       </section>
 
       {/* Categorías */}
-      <section className="relative z-10 mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+      <section className="relative z-10 mx-auto max-w-7xl px-4 pt-16 pb-20 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-6">
           <Link href="/hombres" className="group card-retro relative aspect-[4/3] flex items-end p-8 overflow-hidden">
             <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=435&auto=format&fit=crop')" }} />
