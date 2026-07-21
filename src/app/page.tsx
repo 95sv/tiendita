@@ -130,6 +130,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-6">
           <Link href="/hombres" className="group card-retro relative aspect-[4/3] flex items-end p-8 overflow-hidden">
+            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=435&auto=format&fit=crop')" }} />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
             <div className="relative z-10">
               <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
@@ -141,6 +142,7 @@ export default function Home() {
             </div>
           </Link>
           <Link href="/mujeres" className="group card-retro relative aspect-[4/3] flex items-end p-8 overflow-hidden">
+            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('https://drive.google.com/uc?export=download&id=13n0C9NecPjzyabJ11T7HBOoKJ-8dYqjb')" }} />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
             <div className="relative z-10">
               <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
