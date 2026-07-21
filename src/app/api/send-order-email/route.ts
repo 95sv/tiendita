@@ -111,16 +111,21 @@ export async function POST(req: NextRequest) {
 
     const html = buildOrderEmail({ name: name || "Cliente", items, total, address, city, province })
 
-    await resendClient.emails.send({
-      from: process.env.RESEND_FROM || "La Loya <noreply@laloya.com>",
-      to: email || "noreply@laloya.com",
+    const result = await resendClient.emails.send({
+      from: process.env.RESEND_FROM || "La Loya <onboarding@resend.dev>",
+      to: "laloya.bb@gmail.com",
       subject: `La Loya - Confirmacion de compra`,
       html,
     })
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Email error:", error)
-    return NextResponse.json({ success: true, skipped: true })
+    if (result.error) {
+      console.error("Resend error:", result.error)
+      return NextResponse.json({ success: false, error: result.error })
+    }
+
+    return NextResponse.json({ success: true, id: result.data?.id })
+  } catch (error: any) {
+    console.error("Email error:", error.message || error)
+    return NextResponse.json({ success: false, error: error.message || "Unknown error" })
   }
 }
