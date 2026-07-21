@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No items provided" }, { status: 400 })
     }
 
-    const origin = req.headers.get("origin") || "https://tiendita-weld.vercel.app"
+    const origin = req.headers.get("origin") || "https://laloya.vercel.app"
     const externalRef = `order_${Date.now()}`
     const total = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0)
 

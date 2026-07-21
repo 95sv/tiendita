@@ -15,7 +15,7 @@
 
 ## 1. Acceso al Panel Admin
 
-- **URL**: `https://tiendita-weld.vercel.app/admin`
+- **URL**: `https://laloya.vercel.app/admin`
 - **Email**: `admin@laloya.com`
 - **Contraseña**: `LaLoya2026!`
 
@@ -217,8 +217,8 @@ Las promociones se crean en MedusaJS pero el checkout actual usa MercadoPago dir
 
 | Servicio | URL |
 |----------|-----|
-| Tienda | https://tiendita-weld.vercel.app |
-| Admin | https://tiendita-weld.vercel.app/admin |
+| Tienda | https://laloya.vercel.app |
+| Admin | https://laloya.vercel.app/admin |
 | Backend MedusaJS | https://la-loya-backend.onrender.com |
 | MercadoPago Dashboard | https://www.mercadopago.com.ar/developers/panel/app |
 | Supabase Dashboard | https://supabase.com/dashboard/project/qtwivutgmrwiielyqoqp |
