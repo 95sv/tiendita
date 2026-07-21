@@ -1,5 +1,6 @@
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
 const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
+const PROXY = "/api/admin/proxy"
 
 export interface MedusaProduct {
   id: string
@@ -47,7 +48,7 @@ function headers(extra?: Record<string, string>) {
 
 async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("medusa_admin_token") : null
-  const res = await fetch(`${MEDUSA_URL}${path}`, {
+  const res = await fetch(`${PROXY}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -63,7 +64,7 @@ async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export async function adminLogin(email: string, password: string): Promise<string> {
-  const res = await fetch(`${MEDUSA_URL}/auth/user/emailpass`, {
+  const res = await fetch(`${PROXY}/auth/user/emailpass`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -212,10 +213,8 @@ export async function createCategory(name: string): Promise<MedusaCategory> {
 }
 
 export async function storeFetchProducts(): Promise<MedusaProduct[]> {
-  const data = await fetch(`${MEDUSA_URL}/store/products?limit=100`, {
-    headers: headers(),
-  }).then((r) => r.json())
-  return data.products || []
+  const data = await fetch(`/api/products`).then((r) => r.json())
+  return data || []
 }
 
 export async function storeFetchCollections(): Promise<MedusaCollection[]> {
