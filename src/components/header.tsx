@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, ShoppingBag, Search } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CartBadge } from "@/components/cart-badge"
 
@@ -42,13 +42,19 @@ export function Header() {
 
           <div className="flex items-center gap-3">
             <button className="hidden md:flex p-2 text-charcoal/60 hover:text-rust transition-colors">
-              <Search size={18} strokeWidth={1.5} />
+              <svg width="19" height="19" viewBox="0 0 18 18" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
+                <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
             </button>
             <Link
               href="/carrito"
               className="relative p-2 text-charcoal/60 hover:text-rust transition-colors"
             >
-              <ShoppingBag size={18} strokeWidth={1.5} />
+              <svg width="19" height="19" viewBox="0 0 18 18" fill="none">
+                <path d="M4 6H14L13 16H5L4 6Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                <path d="M6.5 6V4.5C6.5 3.12 7.62 2 9 2C10.38 2 11.5 3.12 11.5 4.5V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
               <CartBadge />
             </Link>
             <button

@@ -24,12 +24,20 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative h-[90vh] flex items-center justify-center bg-cream overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-          <span className="font-[family-name:var(--font-pacifico)] text-[30vw] text-charcoal select-none">
-            LL
-          </span>
+      <section className="relative h-[90vh] min-h-[640px] flex items-center justify-center overflow-hidden">
+
+        {/* Background triptych */}
+        <div className="absolute inset-0 z-0 flex">
+          <div className="flex-1 bg-cover bg-center opacity-20 blur-[2px] saturate-[1.15] sepia-[0.08]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784639340419-d12a4024cb8c?q=80&w=440&auto=format&fit=crop')" }} />
+          <div className="flex-1 bg-cover bg-center opacity-20 blur-[2px] saturate-[1.15] sepia-[0.08]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784639333516-5adb16a4e3fe?q=80&w=440&auto=format&fit=crop')" }} />
+          <div className="flex-1 bg-cover bg-center opacity-20 blur-[2px] saturate-[1.15] sepia-[0.08]" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784639440698-c5d9eebe427a?q=80&w=440&auto=format&fit=crop')" }} />
         </div>
+
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0 z-1"
+          style={{ background: "linear-gradient(180deg, rgba(44,44,44,0.55) 0%, rgba(161,51,57,0.35) 45%, rgba(20,20,20,0.88) 100%)" }}
+        />
 
         <motion.div
           className="relative z-10 text-center px-4 max-w-3xl"
@@ -38,31 +46,31 @@ export default function Home() {
           transition={{ duration: 0.8 }}
         >
           <div className="inline-flex items-center gap-3 mb-6">
-            <span className="w-12 h-px bg-charcoal/20" />
-            <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.4em] text-charcoal/40">
+            <span className="w-12 h-px bg-cream/30" />
+            <span className="font-[family-name:var(--font-oswald)] text-[10px] uppercase tracking-[0.4em] text-cream/50">
               Bahía Blanca
             </span>
-            <span className="w-12 h-px bg-charcoal/20" />
+            <span className="w-12 h-px bg-cream/30" />
           </div>
 
-          <h1 className="font-[family-name:var(--font-pacifico)] text-6xl sm:text-8xl text-rust leading-none">
+          <h1 className="font-[family-name:var(--font-pacifico)] text-6xl sm:text-8xl text-cream leading-none drop-shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
             La Loya
           </h1>
 
-          <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.3em] text-charcoal/50">
+          <p className="mt-2 font-[family-name:var(--font-oswald)] text-sm uppercase tracking-[0.3em] text-cream/50">
             Ropa & Café
           </p>
 
-          <div className="mt-8 divider-ornamental text-xs font-[family-name:var(--font-oswald)] uppercase tracking-[0.2em] text-charcoal/40">
+          <div className="mt-8 divider-ornamental text-xs font-[family-name:var(--font-oswald)] uppercase tracking-[0.2em] text-cream/40">
             Diseño · Calidad · Esencia
           </div>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/catalogo" className="btn-retro inline-flex items-center justify-center gap-2 px-10 py-4 text-sm">
+            <Link href="/catalogo" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-[0.05em] bg-white/15 backdrop-blur-xl border border-white/30 text-cream rounded-sm transition-all hover:bg-white/25 hover:-translate-y-0.5">
               Ver catálogo
               <ArrowRight size={16} />
             </Link>
-            <Link href="/contacto" className="btn-retro-outline inline-flex items-center justify-center gap-2 px-10 py-4 text-sm">
+            <Link href="/contacto" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-oswald)] uppercase tracking-[0.05em] bg-black/15 backdrop-blur-xl border border-cream/35 text-cream rounded-sm transition-all hover:bg-black/25 hover:-translate-y-0.5">
               Contacto
             </Link>
           </div>
