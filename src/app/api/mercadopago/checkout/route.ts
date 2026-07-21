@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Preference } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
 import { supabase } from "@/lib/supabase"
+import { notifyOwnerNewOrder } from "@/lib/notify"
 
 export async function POST(req: NextRequest) {
   try {
@@ -76,6 +77,22 @@ export async function POST(req: NextRequest) {
       currency: "ARS",
       payment_method: "",
     })
+
+    notifyOwnerNewOrder({
+      external_reference: externalRef,
+      customer_name: name,
+      customer_email: email,
+      customer_phone: phone,
+      customer_address: address,
+      customer_city: city,
+      customer_province: province,
+      items: items.map((item: { name: string; size?: string; quantity: number; price: number }) => ({
+        name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      total,
+    }).catch(console.error)
 
     return NextResponse.json({ url: result.init_point })
   } catch (error) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Payment } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
 import { supabase } from "@/lib/supabase"
+import { notifyOwnerNewOrder } from "@/lib/notify"
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
 
         if (paymentData.status === "approved") {
           const metadata = paymentData.metadata || {}
+          const items = metadata.items ? JSON.parse(metadata.items) : []
 
           await supabase.from("orders").upsert(
             {
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
               customer_city: metadata.customer_city || "",
               customer_province: metadata.customer_province || "",
               customer_postal_code: metadata.customer_postal_code || "",
-              items: metadata.items || [],
+              items,
               total: paymentData.transaction_amount,
               currency: paymentData.currency_id || "ARS",
               payment_method: paymentData.payment_method_id || "",
@@ -46,7 +48,19 @@ export async function POST(req: NextRequest) {
             { onConflict: "external_reference" }
           )
 
-          console.log("Order saved to Supabase:", paymentData.external_reference)
+          console.log("Order approved and saved:", paymentData.external_reference)
+
+          notifyOwnerNewOrder({
+            external_reference: paymentData.external_reference || "",
+            customer_name: metadata.customer_name || "",
+            customer_email: metadata.customer_email || paymentData.payer?.email || "",
+            customer_phone: metadata.customer_phone || "",
+            customer_address: metadata.customer_address || "",
+            customer_city: metadata.customer_city || "",
+            customer_province: metadata.customer_province || "",
+            items,
+            total: paymentData.transaction_amount || 0,
+          }).catch(console.error)
         }
       }
     }
