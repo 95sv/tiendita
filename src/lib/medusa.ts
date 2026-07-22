@@ -303,10 +303,6 @@ export async function createPromotion(body: {
     },
   }
   if (body.is_automatic) promoBody.is_automatic = true
-  if (body.starts_at || body.ends_at) {
-    promoBody.start_rules = []
-    promoBody.end_rules = []
-  }
   const data = await adminFetch<{ promotion: MedusaPromotion }>("/admin/promotions", {
     method: "POST",
     body: JSON.stringify(promoBody),
