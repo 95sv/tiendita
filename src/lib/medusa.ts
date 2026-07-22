@@ -303,12 +303,17 @@ export async function createPromotion(body: {
     },
   }
   if (body.is_automatic) promoBody.is_automatic = true
-  const data = await adminFetch<{ promotion: MedusaPromotion }>("/admin/promotions", {
+  const data = await adminFetch<{ promotion: any }>("/admin/promotions", {
     method: "POST",
     body: JSON.stringify(promoBody),
   })
   if (!data.promotion) throw new Error("Error al crear promocion")
-  return data.promotion
+  const p = data.promotion
+  return {
+    ...p,
+    value: p.application_method?.value ?? 0,
+    type: p.application_method?.type ?? p.type ?? "standard",
+  }
 }
 
 export async function deletePromotion(id: string): Promise<void> {
