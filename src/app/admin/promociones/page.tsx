@@ -15,8 +15,6 @@ function NewPromotionForm({ onCreated, onClose }: { onCreated: (p: MedusaPromoti
   const [code, setCode] = useState("")
   const [type, setType] = useState<"percentage" | "fixed">("percentage")
   const [value, setValue] = useState("")
-  const [startsAt, setStartsAt] = useState("")
-  const [endsAt, setEndsAt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -30,8 +28,6 @@ function NewPromotionForm({ onCreated, onClose }: { onCreated: (p: MedusaPromoti
         code: code.toUpperCase(),
         type,
         value: Number(value),
-        starts_at: startsAt || undefined,
-        ends_at: endsAt || undefined,
       })
       onCreated(promo)
       onClose()
@@ -96,30 +92,9 @@ function NewPromotionForm({ onCreated, onClose }: { onCreated: (p: MedusaPromoti
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Fecha inicio
-              </label>
-              <input
-                type="date"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-                className="input-retro w-full px-4 py-3 text-sm mt-2"
-              />
-            </div>
-            <div>
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Fecha fin
-              </label>
-              <input
-                type="date"
-                value={endsAt}
-                onChange={(e) => setEndsAt(e.target.value)}
-                className="input-retro w-full px-4 py-3 text-sm mt-2"
-              />
-            </div>
-          </div>
+          <p className="text-[10px] text-charcoal/30 font-[family-name:var(--font-libre)] uppercase tracking-wider">
+            Las fechas se configuran desde Campaigns en MedusaJS.
+          </p>
           {error && (
             <p className="text-xs text-red-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">{error}</p>
           )}
@@ -183,8 +158,7 @@ export default function PromocionesPage() {
               Codigo: p.code,
               Tipo: typeLabels[p.type] || p.type,
               Valor: p.type === "percentage" ? `${p.value}%` : p.value,
-              Inicio: p.starts_at ? new Date(p.starts_at).toLocaleDateString("es-AR") : "Sin fecha",
-              Fin: p.ends_at ? new Date(p.ends_at).toLocaleDateString("es-AR") : "Sin fecha",
+              Estado: p.status || "active",
             })), "promociones-la-loya")}
             className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
           >
@@ -208,8 +182,7 @@ export default function PromocionesPage() {
                 <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Codigo</th>
                 <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Tipo</th>
                 <th className="text-right py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Valor</th>
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Inicio</th>
-                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Fin</th>
+                <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Estado</th>
                 <th className="py-3 px-4"></th>
               </tr>
             </thead>
@@ -227,11 +200,10 @@ export default function PromocionesPage() {
                   <td className="py-3 px-4 text-right font-[family-name:var(--font-libre)] text-sm text-charcoal">
                     {promo.type === "percentage" ? `${promo.value}%` : `$${promo.value.toLocaleString("es-AR")}`}
                   </td>
-                  <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-libre)] text-xs text-charcoal/40">
-                    {promo.starts_at ? new Date(promo.starts_at).toLocaleDateString("es-AR") : "Sin fecha"}
-                  </td>
-                  <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-libre)] text-xs text-charcoal/40">
-                    {promo.ends_at ? new Date(promo.ends_at).toLocaleDateString("es-AR") : "Sin fecha"}
+                  <td className="py-3 px-4 hidden md:table-cell">
+                    <span className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider px-2 py-1 bg-green-100 text-green-700">
+                      {promo.status || "active"}
+                    </span>
                   </td>
                   <td className="py-3 px-4">
                     <button onClick={() => handleDelete(promo.id)} className="text-charcoal/30 hover:text-red-500 transition-colors">

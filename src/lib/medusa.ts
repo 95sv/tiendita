@@ -268,6 +268,7 @@ export interface MedusaPromotion {
   ends_at: string | null
   created_at: string
   updated_at: string
+  status?: string
   application_method?: {
     type: string
     value: number
@@ -282,6 +283,7 @@ export async function fetchPromotions(): Promise<MedusaPromotion[]> {
     ...p,
     value: p.application_method?.value ?? p.value ?? 0,
     type: p.application_method?.type ?? p.type ?? "standard",
+    status: p.status ?? "active",
   }))
 }
 
