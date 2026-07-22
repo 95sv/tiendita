@@ -268,13 +268,21 @@ export interface MedusaPromotion {
   ends_at: string | null
   created_at: string
   updated_at: string
+  application_method?: {
+    type: string
+    value: number
+  }
 }
 
 export async function fetchPromotions(): Promise<MedusaPromotion[]> {
-  const data = await adminFetch<{ promotions: MedusaPromotion[]; count: number }>(
-    "/admin/promotions?limit=100"
+  const data = await adminFetch<{ promotions: any[]; count: number }>(
+    "/admin/promotions?limit=100&expand=application_method"
   )
-  return data.promotions || []
+  return (data.promotions || []).map((p: any) => ({
+    ...p,
+    value: p.application_method?.value ?? p.value ?? 0,
+    type: p.application_method?.type ?? p.type ?? "standard",
+  }))
 }
 
 export async function createPromotion(body: {
