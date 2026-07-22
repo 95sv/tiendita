@@ -66,17 +66,11 @@ function medusaToProduct(p: StoreProduct): Product {
   )
   const colors = colorOption?.values?.map((v) => ({ name: v.value, hex: "#000000" })) || []
 
-  const categoryMap: Record<string, "hombres" | "mujeres" | "ofertas"> = {
-    remeras: "hombres",
-    pantalones: "hombres",
-    camperas: "hombres",
-    accesorios: "mujeres",
-    vestidos: "mujeres",
-  }
-
   const catTitle = p.collection?.title?.toLowerCase() || ""
-  const category: "hombres" | "mujeres" | "ofertas" =
-    categoryMap[catTitle] || "hombres"
+  let category: "hombres" | "mujeres" | "ofertas" = "hombres"
+  if (catTitle.includes("mujer")) category = "mujeres"
+  else if (catTitle.includes("oferta")) category = "ofertas"
+  else if (catTitle.includes("remera") || catTitle.includes("pantalon") || catTitle.includes("campera") || catTitle.includes("accesorio") || catTitle.includes("vestido")) category = "hombres"
 
   return {
     id: p.id,

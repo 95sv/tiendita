@@ -158,6 +158,26 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         if (updates.active !== undefined) {
           body.status = updates.active ? "published" : "draft"
         }
+        if (updates.category && updates.category !== existing.category) {
+          const suffix = updates.category === "mujeres" ? " Mujer" : updates.category === "ofertas" ? " Ofertas" : ""
+          const baseTitle = (existing.category === "mujeres" || existing.category === "ofertas")
+            ? existing.categoryTitle?.replace(/ (Mujer|Ofertas)$/, "") || ""
+            : existing.categoryTitle || ""
+          const targetTitle = baseTitle + suffix
+          let collections = get().collections
+          if (collections.length === 0) {
+            const { fetchCollections: fc } = await import("@/lib/medusa")
+            collections = await fc()
+          }
+          let targetColl = collections.find((c) => c.title === targetTitle)
+          if (!targetColl) {
+            const { createCollection: cc } = await import("@/lib/medusa")
+            targetColl = await cc(targetTitle)
+            collections = [...collections, targetColl]
+            set({ collections })
+          }
+          body.collection_id = targetColl.id
+        }
         await updateProduct(existing.medusaId, body)
       }
       set({
