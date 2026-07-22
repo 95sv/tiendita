@@ -6,7 +6,7 @@ import { notifyOwnerNewOrder } from "@/lib/notify"
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, name, email, address, city, postalCode, province, phone } = await req.json()
+    const { items, name, email, address, city, postalCode, province, phone, promoCode, discount } = await req.json()
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items provided" }, { status: 400 })
@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
 
     const origin = req.headers.get("origin") || "https://laloya.vercel.app"
     const externalRef = `order_${Date.now()}`
-    const total = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0)
+    const subtotal = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0)
+    const total = Math.max(0, subtotal - (discount || 0))
 
     const preference = new Preference(mpClient)
     const result = await preference.create({
@@ -76,6 +77,8 @@ export async function POST(req: NextRequest) {
       total,
       currency: "ARS",
       payment_method: "",
+      promo_code: promoCode || "",
+      discount: discount || 0,
     })
 
     notifyOwnerNewOrder({

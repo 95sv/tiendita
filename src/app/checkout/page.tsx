@@ -11,6 +11,10 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("mp")
+  const [promoCode, setPromoCode] = useState("")
+  const [promoDiscount, setPromoDiscount] = useState<{ type: string; value: number } | null>(null)
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoError, setPromoError] = useState("")
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -23,6 +27,38 @@ export default function CheckoutPage() {
 
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }))
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoError("")
+    setPromoDiscount(null)
+    try {
+      const res = await fetch(`/api/promo/validate?code=${encodeURIComponent(promoCode.trim())}`)
+      const data = await res.json()
+      if (data.valid) {
+        setPromoDiscount({ type: data.type, value: data.value })
+      } else {
+        setPromoError(data.error || "Codigo invalido")
+      }
+    } catch {
+      setPromoError("Error al validar codigo")
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  const getDiscount = () => {
+    if (!promoDiscount) return 0
+    if (promoDiscount.type === "percentage") {
+      return Math.round(getTotal() * promoDiscount.value / 100)
+    }
+    return Math.min(promoDiscount.value, getTotal())
+  }
+
+  const getFinalTotal = () => {
+    return Math.max(0, getTotal() - getDiscount())
+  }
 
   if (items.length === 0) {
     return (
@@ -76,6 +112,8 @@ export default function CheckoutPage() {
           city: form.city,
           postalCode: form.postalCode,
           province: form.province,
+          promoCode: promoCode || undefined,
+          discount: getDiscount() || undefined,
         }),
       })
 
@@ -254,6 +292,35 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
+              <div className="mt-4 border-t border-charcoal/10 pt-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Codigo de descuento"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    className="input-retro flex-1 px-3 py-2 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyPromoCode}
+                    disabled={promoLoading}
+                    className="btn-retro px-4 py-2 text-xs"
+                  >
+                    {promoLoading ? "..." : "Aplicar"}
+                  </button>
+                </div>
+                {promoDiscount && (
+                  <p className="mt-2 text-xs text-green-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">
+                    Descuento aplicado: {promoDiscount.type === "percentage" ? `${promoDiscount.value}%` : `$${promoDiscount.value.toLocaleString("es-AR")}`}
+                  </p>
+                )}
+                {promoError && (
+                  <p className="mt-2 text-xs text-red-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">
+                    {promoError}
+                  </p>
+                )}
+              </div>
               <div className="mt-4 border-t border-charcoal/10 pt-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-charcoal/50">Subtotal</span>
@@ -261,6 +328,14 @@ export default function CheckoutPage() {
                     {formatPrice(getTotal())}
                   </span>
                 </div>
+                {promoDiscount && (
+                  <div className="flex justify-between">
+                    <span className="text-green-600">Descuento</span>
+                    <span className="font-[family-name:var(--font-libre)] text-green-600">
+                      -{formatPrice(getDiscount())}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-charcoal/50">Envio</span>
                   <span className="text-charcoal/30 text-xs font-[family-name:var(--font-libre)] uppercase">
@@ -272,7 +347,7 @@ export default function CheckoutPage() {
                     Total
                   </span>
                   <span className="font-[family-name:var(--font-libre)] text-charcoal">
-                    {formatPrice(getTotal())}
+                    {formatPrice(getFinalTotal())}
                   </span>
                 </div>
               </div>

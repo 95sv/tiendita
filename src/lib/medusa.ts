@@ -349,7 +349,11 @@ export async function createPriceList(body: {
 }): Promise<MedusaPriceList> {
   const data = await adminFetch<{ price_list: MedusaPriceList }>("/admin/price-lists", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      title: body.name,
+      description: body.description,
+      type: body.type,
+    }),
   })
   return data.price_list
 }
