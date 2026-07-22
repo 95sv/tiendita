@@ -285,10 +285,26 @@ export async function createPromotion(body: {
   starts_at?: string
   ends_at?: string
 }): Promise<MedusaPromotion> {
-  const data = await adminFetch<{ promotion: MedusaPromotion }>("/admin/promotions", {
+  const promoBody: any = {
+    code: body.code,
+    type: "standard",
+    application_method: {
+      type: body.type === "percentage" ? "percentage" : "fixed",
+      value: body.value,
+      target_type: "order",
+    },
+  }
+  if (body.is_automatic) promoBody.is_automatic = true
+  if (body.starts_at || body.ends_at) {
+    promoBody.start_rules = []
+    promoBody.end_rules = []
+  }
+  const data = await fetch(`${PROXY}/admin/promotions`, {
     method: "POST",
-    body: JSON.stringify(body),
-  })
+    headers: headers(),
+    body: JSON.stringify(promoBody),
+  }).then((r) => r.json())
+  if (data.message) throw new Error(data.message)
   return data.promotion
 }
 
