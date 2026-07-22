@@ -307,12 +307,11 @@ export async function createPromotion(body: {
     promoBody.start_rules = []
     promoBody.end_rules = []
   }
-  const data = await fetch(`${PROXY}/admin/promotions`, {
+  const data = await adminFetch<{ promotion: MedusaPromotion }>("/admin/promotions", {
     method: "POST",
-    headers: headers(),
     body: JSON.stringify(promoBody),
-  }).then((r) => r.json())
-  if (data.message) throw new Error(data.message)
+  })
+  if (!data.promotion) throw new Error("Error al crear promocion")
   return data.promotion
 }
 
