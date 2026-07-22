@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    await supabase.from("orders").insert({
+    await supabase.from("pedidos").insert({
       external_reference: externalRef,
       status: "pending",
       customer_name: name,

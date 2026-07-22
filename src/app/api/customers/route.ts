@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase"
 
 export async function GET() {
   const { data: orders, error } = await supabase
-    .from("orders")
+    .from("pedidos")
     .select("customer_name, customer_email, customer_phone, total, created_at, status")
     .order("created_at", { ascending: false })
 

@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase"
 
 export async function GET() {
   const { data, error } = await supabase
-    .from("orders")
+    .from("pedidos")
     .select("*")
     .order("created_at", { ascending: false })
 
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from("orders")
+    .from("pedidos")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", id)
     .select()

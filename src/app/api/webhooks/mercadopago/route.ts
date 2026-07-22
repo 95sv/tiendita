@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
           const metadata = paymentData.metadata || {}
           const items = metadata.items ? JSON.parse(metadata.items) : []
 
-          await supabase.from("orders").upsert(
+          await supabase.from("pedidos").upsert(
             {
               external_reference: paymentData.external_reference,
               payment_id: String(paymentData.id),
