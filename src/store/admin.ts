@@ -33,6 +33,7 @@ export interface AdminProduct {
   active: boolean
   medusaId?: string
   collectionId?: string
+  categoryTitle?: string
   status?: "draft" | "published"
 }
 
@@ -71,6 +72,11 @@ function medusaToAdmin(p: MedusaProduct): AdminProduct {
     0
   ) || 50
 
+  const catTitle = p.collection?.title?.toLowerCase() || ""
+  let category: "hombres" | "mujeres" | "ofertas" = "hombres"
+  if (catTitle.includes("mujer")) category = "mujeres"
+  else if (catTitle.includes("oferta")) category = "ofertas"
+
   return {
     id: p.id,
     name: p.title,
@@ -78,7 +84,8 @@ function medusaToAdmin(p: MedusaProduct): AdminProduct {
     price,
     originalPrice: maxPrice && maxPrice > price ? maxPrice : undefined,
     images: p.images?.map((img) => img.url) || (p.thumbnail ? [p.thumbnail] : []),
-    category: p.collection?.title || "Sin categoría",
+    category,
+    categoryTitle: p.collection?.title || undefined,
     subcategory: undefined,
     sizes,
     colors,
