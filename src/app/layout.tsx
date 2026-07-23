@@ -17,6 +17,31 @@ const libreFranklin = Libre_Franklin({
 export const metadata: Metadata = {
   title: "La Loya — Ropa & Café",
   description: "Ropa de diseño y café de especialidad. Estilo retro, calidad premium. Bahía Blanca.",
+  icons: {
+    icon: "/logo-rust.png",
+  },
+  openGraph: {
+    title: "La Loya — Ropa & Café",
+    description: "Ropa de diseño y café de especialidad. Estilo retro, calidad premium. Bahía Blanca.",
+    url: "https://laloya.vercel.app",
+    siteName: "La Loya",
+    images: [
+      {
+        url: "/logo-cropped.png",
+        width: 512,
+        height: 512,
+        alt: "La Loya",
+      },
+    ],
+    locale: "es_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "La Loya — Ropa & Café",
+    description: "Ropa de diseño y café de especialidad. Estilo retro, calidad premium. Bahía Blanca.",
+    images: ["/logo-cropped.png"],
+  },
 }
 
 export default function RootLayout({
