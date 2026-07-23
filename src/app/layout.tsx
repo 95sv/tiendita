@@ -18,7 +18,8 @@ export const metadata: Metadata = {
   title: "La Loya — Ropa & Café",
   description: "Ropa de diseño y café de especialidad. Estilo retro, calidad premium. Bahía Blanca.",
   icons: {
-    icon: "/logo-rust.png",
+    icon: ["/logo-rust.png", "/logo-rust.png"],
+    shortcut: "/logo-rust.png",
   },
   openGraph: {
     title: "La Loya — Ropa & Café",
