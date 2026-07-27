@@ -104,6 +104,7 @@ export async function getAllProducts(): Promise<Product[]> {
       `${MEDUSA_URL}/store/products?limit=100${REGION_ID ? `&region_id=${REGION_ID}` : ""}`,
       {
         headers: { "x-publishable-api-key": API_KEY },
+        cache: "no-store",
       }
     )
 
