@@ -346,14 +346,30 @@ export async function createPriceList(body: {
   type: string
   starts_at?: string
   ends_at?: string
+  prices?: { variant_id: string; amount: number; currency_code: string }[]
 }): Promise<MedusaPriceList> {
+  const payload: any = {
+    title: body.name,
+    description: body.description,
+    type: body.type,
+  }
+  if (body.prices) payload.prices = body.prices
   const data = await adminFetch<{ price_list: MedusaPriceList }>("/admin/price-lists", {
     method: "POST",
-    body: JSON.stringify({
-      title: body.name,
-      description: body.description,
-      type: body.type,
-    }),
+    body: JSON.stringify(payload),
+  })
+  return data.price_list
+}
+
+export async function updatePriceList(
+  id: string,
+  body: {
+    prices?: { variant_id: string; amount: number; currency_code: string }[]
+  }
+): Promise<MedusaPriceList> {
+  const data = await adminFetch<{ price_list: MedusaPriceList }>(`/admin/price-lists/${id}`, {
+    method: "POST",
+    body: JSON.stringify(body),
   })
   return data.price_list
 }

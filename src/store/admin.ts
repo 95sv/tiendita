@@ -52,10 +52,12 @@ interface AdminStore {
   toggleActive: (id: string) => Promise<void>
 }
 
-function medusaToAdmin(p: MedusaProduct): AdminProduct {
+function medusaToAdmin(p: MedusaProduct, storePrices?: Map<string, { calculated: number; original: number }>): AdminProduct {
   const price = p.variants?.[0]?.prices?.[0]?.amount || 0
-  const allPrices = (p.variants || []).flatMap((v) => (v.prices || []).map((pr) => pr.amount)).filter((n) => n > 0)
-  const maxPrice = allPrices.length > 1 ? Math.max(...allPrices) : undefined
+
+  const sp = storePrices?.get(p.id)
+  const finalPrice = sp?.calculated ?? price
+  const originalPrice = sp && sp.original > sp.calculated ? sp.original : undefined
 
   const sizeOption = p.options?.find((o) =>
     ["talle", "size", "talles", "sizes"].includes(o.title.toLowerCase())
@@ -81,8 +83,8 @@ function medusaToAdmin(p: MedusaProduct): AdminProduct {
     id: p.id,
     name: p.title,
     description: p.description || "",
-    price,
-    originalPrice: maxPrice && maxPrice > price ? maxPrice : undefined,
+    price: finalPrice,
+    originalPrice,
     images: p.images?.map((img) => img.url) || (p.thumbnail ? [p.thumbnail] : []),
     category,
     categoryTitle: p.collection?.title || undefined,
@@ -110,7 +112,29 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
     set({ loading: true, error: null })
     try {
       const products = await fetchProducts()
-      set({ products: products.map(medusaToAdmin), loading: false })
+
+      let storePrices: Map<string, { calculated: number; original: number }> | undefined
+      try {
+        const REGION_ID = process.env.NEXT_PUBLIC_MEDUSA_REGION_ID || ""
+        const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
+        const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
+        const storeRes = await fetch(`${MEDUSA_URL}/store/products?limit=100${REGION_ID ? `&region_id=${REGION_ID}` : ""}`, {
+          headers: { "x-publishable-api-key": API_KEY },
+          cache: "no-store",
+        })
+        if (storeRes.ok) {
+          const storeData = await storeRes.json()
+          storePrices = new Map()
+          for (const sp of storeData.products || []) {
+            const calc = sp.variants?.[0]?.calculated_price
+            if (calc) {
+              storePrices.set(sp.id, { calculated: calc.calculated_amount, original: calc.original_amount })
+            }
+          }
+        }
+      } catch {}
+
+      set({ products: products.map((p) => medusaToAdmin(p, storePrices)), loading: false })
     } catch (e: any) {
       set({ error: e.message, loading: false })
     }
@@ -185,7 +209,50 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
           }
           body.collection_id = targetColl.id
         }
+
+        if (updates.price !== undefined) {
+          const { fetchProduct: fp } = await import("@/lib/medusa")
+          const full = await fp(existing.medusaId)
+          const basePrice = (updates.originalPrice && updates.originalPrice > updates.price)
+            ? updates.originalPrice
+            : updates.price
+          body.variants = (full.variants || []).map((v: any) => ({
+            id: v.id,
+            prices: [{ amount: basePrice, currency_code: "ars" }],
+          }))
+        }
+
         await updateProduct(existing.medusaId, body)
+
+        if (updates.price !== undefined || updates.originalPrice !== undefined) {
+          const newPrice = updates.price ?? existing.price
+          const newOriginal = updates.originalPrice ?? existing.originalPrice
+          const { fetchPriceLists: fpl, createPriceList: cpl, updatePriceList: upl, deletePriceList: dpl } = await import("@/lib/medusa")
+          const lists = await fpl()
+          const saleList = lists.find((l: any) => l.title === `Sale - ${existing.name}`)
+
+          if (newOriginal && newOriginal > 0 && newPrice && newPrice > 0 && newOriginal > newPrice) {
+            const { fetchProduct: fp2 } = await import("@/lib/medusa")
+            const full2 = await fp2(existing.medusaId)
+            const prices = (full2.variants || []).map((v: any) => ({
+              variant_id: v.id,
+              amount: newPrice,
+              currency_code: "ars",
+            }))
+            if (saleList) {
+              await upl(saleList.id, { prices })
+            } else {
+              await cpl({
+                name: `Sale - ${existing.name}`,
+                description: `Descuento para ${existing.name}`,
+                type: "sale",
+                prices,
+              })
+            }
+          } else if (saleList) {
+            await dpl(saleList.id)
+          }
+        }
       }
       set({
         products: get().products.map((p) =>
