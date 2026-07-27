@@ -30,7 +30,7 @@ export default function CatalogoPage() {
 
   const filtered = activeCategory === "all"
     ? products
-    : products.filter((p) => p.collectionTitle?.toLowerCase() === activeCategory)
+    : products.filter((p) => p.collectionTitle?.toLowerCase().includes(activeCategory))
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
