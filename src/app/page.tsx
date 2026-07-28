@@ -8,7 +8,6 @@ import { useEffect, useState, useCallback } from "react"
 import SplitText from "@/components/SplitText"
 import ShinyText from "@/components/ShinyText"
 import FadeContent from "@/components/FadeContent"
-import Waves from "@/components/Waves"
 import type { Product } from "@/types"
 
 export default function Home() {
@@ -90,11 +89,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Waves divider */}
-      <div className="h-20 relative -mt-10 z-20">
-        <Waves lineColor="var(--color-cream)" backgroundColor="transparent" waveAmpX={20} waveAmpY={10} xGap={14} yGap={28} />
-      </div>
-
       {/* Nueva Colección */}
       <FadeContent duration={800} threshold={0.15}>
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -150,35 +144,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Waves divider */}
-      <div className="h-16 relative">
-        <Waves lineColor="var(--color-charcoal)" backgroundColor="var(--color-cream)" waveAmpX={16} waveAmpY={8} xGap={12} yGap={24} />
-      </div>
-
       {/* Categorías */}
       <FadeContent duration={800} threshold={0.1}>
         <section className="relative z-10 mx-auto max-w-7xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-6">
-            <Link href="/hombres" className="group card-retro relative aspect-[4/3] flex items-end p-8">
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=435&auto=format&fit=crop')" }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
-              <div className="relative z-10">
+            <Link href="/hombres" className="group relative rounded-2xl overflow-hidden aspect-[16/10] flex items-end">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=600&auto=format&fit=crop')" }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/30 to-transparent" />
+              <div className="relative z-10 p-8">
                 <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
                   Colección
                 </span>
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
+                <h3 className="font-[family-name:var(--font-cormorant)] text-4xl text-cream mt-1">
                   Hombres
                 </h3>
               </div>
             </Link>
-            <Link href="/mujeres" className="group card-retro relative aspect-[4/3] flex items-end p-8">
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('/laloya-colwo.jpg')" }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
-              <div className="relative z-10">
+            <Link href="/mujeres" className="group relative rounded-2xl overflow-hidden aspect-[16/10] flex items-end">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('/laloya-colwo.jpg')" }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/30 to-transparent" />
+              <div className="relative z-10 p-8">
                 <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
                   Colección
                 </span>
-                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
+                <h3 className="font-[family-name:var(--font-cormorant)] text-4xl text-cream mt-1">
                   Mujeres
                 </h3>
               </div>
