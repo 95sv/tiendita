@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Cormorant_Garamond, Libre_Franklin } from "next/font/google"
+import { Cormorant_Garamond, Libre_Franklin, Changa_One, Bungee } from "next/font/google"
 import "./globals.css"
 import { ClientLayout } from "@/components/client-layout"
 
@@ -12,6 +12,18 @@ const cormorant = Cormorant_Garamond({
 const libreFranklin = Libre_Franklin({
   subsets: ["latin"],
   variable: "--font-libre",
+})
+
+const changaOne = Changa_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-changa",
+})
+
+const bungee = Bungee({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bungee",
 })
 
 export const metadata: Metadata = {
@@ -53,7 +65,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${cormorant.variable} ${libreFranklin.variable}`}
+      className={`${cormorant.variable} ${libreFranklin.variable} ${changaOne.variable} ${bungee.variable}`}
     >
       <body className="min-h-screen flex flex-col antialiased">
         <ClientLayout>{children}</ClientLayout>
