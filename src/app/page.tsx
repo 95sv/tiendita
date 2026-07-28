@@ -152,10 +152,10 @@ export default function Home() {
               <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=600&auto=format&fit=crop')" }} />
               <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/30 to-transparent" />
               <div className="relative z-10 p-8">
-                <span className="font-[family-name:var(--font-bungee)] text-[10px] uppercase tracking-[0.3em] text-rust" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
+                <span className="font-[family-name:var(--font-bungee)] text-[10px] uppercase tracking-[0.3em] text-rust" style={{ textShadow: "0 0 6px rgba(0,0,0,0.3), 0 0 12px rgba(0,0,0,0.2)" }}>
                   Colección
                 </span>
-                <h3 className="font-[family-name:var(--font-changa)] text-4xl font-bold uppercase tracking-[0.04em] text-cream mt-1" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+                <h3 className="font-[family-name:var(--font-changa)] text-4xl font-bold uppercase tracking-[0.04em] leading-none text-cream mt-1" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
                   Hombres
                 </h3>
               </div>
@@ -164,10 +164,10 @@ export default function Home() {
               <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('/laloya-colwo.jpg')" }} />
               <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/30 to-transparent" />
               <div className="relative z-10 p-8">
-                <span className="font-[family-name:var(--font-bungee)] text-[10px] uppercase tracking-[0.3em] text-rust" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
+                <span className="font-[family-name:var(--font-bungee)] text-[10px] uppercase tracking-[0.3em] text-rust" style={{ textShadow: "0 0 6px rgba(0,0,0,0.3), 0 0 12px rgba(0,0,0,0.2)" }}>
                   Colección
                 </span>
-                <h3 className="font-[family-name:var(--font-changa)] text-4xl font-bold uppercase tracking-[0.04em] text-cream mt-1" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+                <h3 className="font-[family-name:var(--font-changa)] text-4xl font-bold uppercase tracking-[0.04em] leading-none text-cream mt-1" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
                   Mujeres
                 </h3>
               </div>
