@@ -113,11 +113,12 @@ body::before {
 
 /* Badge retro */
 .badge-retro {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.65rem;
-  padding: 0.25rem 0.75rem;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.75rem;
   border: 1.5px solid currentColor;
 }
 
