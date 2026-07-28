@@ -232,6 +232,10 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
           body.collection_id = targetColl.id
         }
 
+        if (updates.images !== undefined && updates.images.length > 0) {
+          body.images = updates.images.map((url: string) => ({ url }))
+        }
+
         if (updates.price !== undefined) {
           const { fetchProduct: fp } = await import("@/lib/medusa")
           const full = await fp(existing.medusaId)
