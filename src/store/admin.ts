@@ -206,8 +206,8 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       const existing = get().products.find((p) => p.id === id)
       if (existing?.medusaId) {
         const body: any = {}
-        if (updates.name) body.title = updates.name
-        if (updates.description) body.description = updates.description
+        if (updates.name !== undefined) body.title = updates.name
+        if (updates.description !== undefined) body.description = updates.description
         if (updates.active !== undefined) {
           body.status = updates.active ? "published" : "draft"
         }
@@ -232,7 +232,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
           body.collection_id = targetColl.id
         }
 
-        if (updates.images !== undefined && updates.images.length > 0) {
+        if (updates.images !== undefined) {
           body.images = updates.images.map((url: string) => ({ url }))
         }
 
@@ -253,6 +253,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         if (updates.price !== undefined || updates.originalPrice !== undefined) {
           const newPrice = updates.price ?? existing.price
           const newOriginal = updates.originalPrice ?? existing.originalPrice
+          const productName = updates.name ?? existing.name
           const { fetchPriceLists: fpl, createPriceList: cpl, updatePriceList: upl, deletePriceList: dpl } = await import("@/lib/medusa")
           const lists = await fpl()
           const saleList = lists.find((l: any) => l.title === `Sale - ${existing.name}`)
@@ -269,8 +270,8 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
               await upl(saleList.id, { prices })
             } else {
               await cpl({
-                name: `Sale - ${existing.name}`,
-                description: `Descuento para ${existing.name}`,
+                name: `Sale - ${productName}`,
+                description: `Descuento para ${productName}`,
                 type: "sale",
                 prices,
               })
