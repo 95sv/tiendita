@@ -158,9 +158,31 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
     set({ loading: true, error: null })
     try {
       const sizeOption = product.sizes.length > 0 ? product.sizes : ["Único"]
+
+      let collectionId: string | undefined
+      try {
+        let collections = get().collections
+        if (collections.length === 0) {
+          const { fetchCollections: fc } = await import("@/lib/medusa")
+          collections = await fc()
+          set({ collections })
+        }
+        const suffix = product.category === "mujeres" ? " Mujer" : product.category === "ofertas" ? " Ofertas" : ""
+        const targetTitle = (product.subcategory || product.name.split(" ")[0]) + suffix
+        let targetColl = collections.find((c) => c.title === targetTitle)
+        if (!targetColl) {
+          const { createCollection: cc } = await import("@/lib/medusa")
+          targetColl = await cc(targetTitle)
+          collections = [...collections, targetColl]
+          set({ collections })
+        }
+        collectionId = targetColl.id
+      } catch {}
+
       const created = await createProduct({
         title: product.name,
         description: product.description,
+        collection_id: collectionId,
         options: [{ title: "Talle", values: sizeOption }],
         variants: sizeOption.map((s) => ({
           title: s,

@@ -101,7 +101,7 @@ export async function fetchProduct(id: string): Promise<MedusaProduct> {
   return data.product
 }
 
-const SALES_CHANNEL_ID = "sc_01KY07XRRAQ1HTB8XDMF1G9XZK"
+const SALES_CHANNEL_ID = "sc_01KYJQ8CVRD3HKY51JZ2N4JVAP"
 
 export async function createProduct(body: {
   title: string
