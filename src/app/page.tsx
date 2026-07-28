@@ -5,6 +5,10 @@ import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { ProductCard } from "@/components/product-card"
 import { useEffect, useState, useCallback } from "react"
+import SplitText from "@/components/SplitText"
+import ShinyText from "@/components/ShinyText"
+import FadeContent from "@/components/FadeContent"
+import Waves from "@/components/Waves"
 import type { Product } from "@/types"
 
 export default function Home() {
@@ -66,6 +70,14 @@ export default function Home() {
         >
           <img src="/logo-cream.png" alt="La Loya — Ropa & Café, Bahía Blanca" className="h-[180px] w-auto block mx-auto drop-shadow-[0_2px_24px_rgba(0,0,0,0.4)]" />
 
+          <SplitText
+            text="Ropa & Café — Bahía Blanca"
+            tag="h1"
+            className="font-[family-name:var(--font-libre)] text-lg sm:text-xl uppercase tracking-[0.2em] text-cream/70 mt-6"
+            delay={0.04}
+            duration={0.6}
+          />
+
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/catalogo" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-[family-name:var(--font-libre)] uppercase tracking-[0.05em] bg-white/15 backdrop-blur-xl border border-white/30 text-cream rounded-sm transition-all hover:bg-white/25 hover:-translate-y-0.5">
               Ver catálogo
@@ -78,83 +90,102 @@ export default function Home() {
         </motion.div>
       </section>
 
+      {/* Waves divider */}
+      <div className="h-20 relative -mt-10 z-20">
+        <Waves lineColor="var(--color-cream)" backgroundColor="transparent" waveAmpX={20} waveAmpY={10} xGap={14} yGap={28} />
+      </div>
+
       {/* Nueva Colección */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
-              Lo último
-            </span>
-            <h2 className="font-[family-name:var(--font-libre)] text-3xl uppercase tracking-[0.05em] text-charcoal mt-1">
-              Nueva Colección
-            </h2>
+      <FadeContent duration={800} threshold={0.15}>
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
+                Lo último
+              </span>
+              <h2 className="font-[family-name:var(--font-libre)] text-3xl uppercase tracking-[0.05em] text-charcoal mt-1">
+                Nueva Colección
+              </h2>
+            </div>
+            <Link
+              href="/catalogo"
+              className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.15em] text-charcoal/50 hover:text-rust transition-colors flex items-center gap-1"
+            >
+              Ver todo <ArrowRight size={12} />
+            </Link>
           </div>
-          <Link
-            href="/catalogo"
-            className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-[0.15em] text-charcoal/50 hover:text-rust transition-colors flex items-center gap-1"
-          >
-            Ver todo <ArrowRight size={12} />
-          </Link>
-        </div>
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
-              Cargando productos...
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-            {newProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </section>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/30 animate-pulse">
+                Cargando productos...
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+              {newProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </section>
+      </FadeContent>
 
       {/* Banner */}
-      <section className="bg-charcoal py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <img src="/logo-cream.png" alt="La Loya" className="h-[60px] w-auto mx-auto" />
-          <p className="mt-2 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.2em] text-cream/50 max-w-md mx-auto">
-            Diseño que se siente. Calidad que se nota. Bahía Blanca, Argentina.
-          </p>
-          <div className="mt-3 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em]">
-            <span className="w-8 h-px bg-cream/20" />
-            Lun — Sáb 7am a 8pm
-            <span className="w-8 h-px bg-cream/20" />
-          </div>
+      <section className="bg-charcoal py-10 relative overflow-hidden">
+        <img src="/logo-cream.png" alt="La Loya" className="h-[60px] w-auto mx-auto" />
+        <div className="mt-3 text-center">
+          <ShinyText
+            text="Diseño que se siente. Calidad que se nota."
+            className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.2em] text-cream/50 max-w-md mx-auto"
+            speed={3}
+            color="rgba(245,240,232,0.5)"
+            shineColor="rgba(245,240,232,0.9)"
+            pauseOnHover
+          />
+        </div>
+        <div className="mt-3 inline-flex items-center gap-3 text-xs text-cream/30 font-[family-name:var(--font-libre)] uppercase tracking-[0.2em] mx-auto text-center w-full justify-center">
+          <span className="w-8 h-px bg-cream/20" />
+          Lun — Sáb 7am a 8pm
+          <span className="w-8 h-px bg-cream/20" />
         </div>
       </section>
 
+      {/* Waves divider */}
+      <div className="h-16 relative">
+        <Waves lineColor="var(--color-charcoal)" backgroundColor="var(--color-cream)" waveAmpX={16} waveAmpY={8} xGap={12} yGap={24} />
+      </div>
+
       {/* Categorías */}
-      <section className="relative z-10 mx-auto max-w-7xl px-4 pt-20 pb-20 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-6">
-          <Link href="/hombres" className="group card-retro relative aspect-[4/3] flex items-end p-8">
-            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=435&auto=format&fit=crop')" }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
-            <div className="relative z-10">
-              <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
-                Colección
-              </span>
-              <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
-                Hombres
-              </h3>
-            </div>
-          </Link>
-          <Link href="/mujeres" className="group card-retro relative aspect-[4/3] flex items-end p-8">
-            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('/laloya-colwo.jpg')" }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
-            <div className="relative z-10">
-              <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
-                Colección
-              </span>
-              <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
-                Mujeres
-              </h3>
-            </div>
-          </Link>
-        </div>
-      </section>
+      <FadeContent duration={800} threshold={0.1}>
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Link href="/hombres" className="group card-retro relative aspect-[4/3] flex items-end p-8">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1784643842911-a38bb42b2415?q=80&w=435&auto=format&fit=crop')" }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
+              <div className="relative z-10">
+                <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
+                  Colección
+                </span>
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
+                  Hombres
+                </h3>
+              </div>
+            </Link>
+            <Link href="/mujeres" className="group card-retro relative aspect-[4/3] flex items-end p-8">
+              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: "url('/laloya-colwo.jpg')" }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent" />
+              <div className="relative z-10">
+                <span className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.3em] text-rust">
+                  Colección
+                </span>
+                <h3 className="font-[family-name:var(--font-cormorant)] text-3xl text-cream mt-1">
+                  Mujeres
+                </h3>
+              </div>
+            </Link>
+          </div>
+        </section>
+      </FadeContent>
     </>
   )
 }

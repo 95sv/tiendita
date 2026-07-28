@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { formatPrice } from "@/lib/utils"
+import GlareHover from "@/components/GlareHover"
 import type { Product } from "@/types"
 
 interface ProductCardProps {
@@ -18,31 +19,45 @@ export function ProductCard({ product }: ProductCardProps) {
       transition={{ duration: 0.4 }}
     >
       <Link href={`/producto/${product.slug}`} className="group block">
-        <div className="card-retro relative aspect-[3/4] overflow-hidden bg-cream-dark">
-          {product.isNew && (
-            <span className="badge-retro absolute left-3 top-3 z-10 text-rust border-rust bg-cream">
-              Nuevo
-            </span>
-          )}
-          {product.discount && (
-            <span className="badge-retro absolute left-3 top-3 z-10 text-rust border-rust bg-cream">
-              -{product.discount}%
-            </span>
-          )}
-          {product.images[0] ? (
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-cream-dark">
-              <span className="font-[family-name:var(--font-cormorant)] text-2xl text-charcoal/20">LL</span>
-            </div>
-          )}
-        </div>
+        <GlareHover
+          width="100%"
+          height="auto"
+          background="var(--color-cream-dark)"
+          borderRadius="12px"
+          borderColor="transparent"
+          glareColor="#ffffff"
+          glareOpacity={0.15}
+          glareAngle={-45}
+          glareSize={300}
+          transitionDuration={800}
+          className="card-retro relative aspect-[3/4] overflow-hidden"
+        >
+          <div className="relative w-full aspect-[3/4]">
+            {product.isNew && (
+              <span className="badge-retro absolute left-3 top-3 z-10 text-rust border-rust bg-cream">
+                Nuevo
+              </span>
+            )}
+            {product.discount && (
+              <span className="badge-retro absolute left-3 top-3 z-10 text-rust border-rust bg-cream">
+                -{product.discount}%
+              </span>
+            )}
+            {product.images[0] ? (
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-cream-dark">
+                <span className="font-[family-name:var(--font-cormorant)] text-2xl text-charcoal/20">LL</span>
+              </div>
+            )}
+          </div>
+        </GlareHover>
 
         <div className="mt-3 space-y-1">
           <h3 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.05em] text-charcoal group-hover:text-rust transition-colors">
