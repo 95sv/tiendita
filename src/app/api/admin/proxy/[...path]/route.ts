@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
+const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
 
 export async function GET(
   req: NextRequest,
@@ -13,6 +14,7 @@ export async function GET(
   const res = await fetch(`${MEDUSA_URL}/${pathStr}`, {
     headers: {
       "Content-Type": "application/json",
+      "x-publishable-api-key": API_KEY,
       ...(token ? { Authorization: token } : {}),
     },
   })
@@ -34,6 +36,7 @@ export async function POST(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-publishable-api-key": API_KEY,
       ...(token ? { Authorization: token } : {}),
     },
     body,
@@ -55,6 +58,7 @@ export async function DELETE(
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
+      "x-publishable-api-key": API_KEY,
       ...(token ? { Authorization: token } : {}),
     },
   })
