@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# La Loya — Tienda online
 
-## Getting Started
+Tienda de ropa con catálogo, carrito, pago por MercadoPago y panel de administración.
 
-First, run the development server:
+- Tienda: https://laloya.vercel.app
+- Panel: https://laloya.vercel.app/admin
+- Manual de uso para quien opera la tienda: [MANUAL.md](MANUAL.md)
+- Notas técnicas para quien toca el código: [AGENTS.md](AGENTS.md)
+
+## Arquitectura
+
+| Pieza | Tecnología | Dónde corre | Qué guarda o hace |
+|---|---|---|---|
+| Frontend (este repo) | Next.js | Vercel | Tienda, panel admin y rutas `/api/*` |
+| Backend | MedusaJS v2 (repo `la-loya-backend`) | Render | Productos, variantes, precios, stock, usuarios admin |
+| Pedidos | Supabase (tabla `pedidos`) | Supabase | Pedidos y datos de los clientes |
+| Pagos | MercadoPago Checkout Pro | MercadoPago | Cobro y aviso de pago (webhook) |
+| Emails | Resend | Resend | Aviso al dueño por cada compra pagada |
+
+El navegador solo habla con este frontend. Las claves secretas (MercadoPago, Supabase, Resend, secret de stock) viven en el servidor y nunca llegan al navegador.
+
+## Flujo de una compra
+
+1. **Catálogo.** La tienda pide los productos publicados al backend (`/store/products-stock`), con precio y stock de cada combinación de talle y color.
+2. **Producto y carrito.** El cliente elige talle, color y cantidad. Lo que no tiene stock aparece deshabilitado. El carrito se guarda en el navegador.
+3. **Checkout.** `POST /api/mercadopago/checkout` vuelve a consultar el catálogo y arma el pedido con el precio y el stock del servidor (`lib/checkout.ts`). Si el precio cambió, no hay stock o el catálogo no responde, rechaza la compra con un mensaje. Si está todo bien, crea el pago en MercadoPago, guarda el pedido como `pending` y redirige al cliente.
+4. **Pago.** El cliente paga en MercadoPago.
+5. **Webhook.** MercadoPago llama a `POST /api/webhooks/mercadopago`. La tienda le consulta el pago a MercadoPago con su propia clave (no confía en el contenido del aviso) y, si está aprobado:
+   - pasa el pedido a `approved` (una sola vez, aunque el aviso se repita),
+   - envía el email al dueño (`lib/notify.ts`),
+   - descuenta el stock de cada variante en el backend (`POST /store/stock`), una sola vez por pedido.
+6. **Vuelta a la tienda.** El cliente ve la pantalla de compra exitosa.
+
+Si el backend está dormido cuando llega el webhook, la tienda responde con error y MercadoPago reintenta más tarde.
+
+## Flujo del panel admin
+
+1. **Ingreso.** El admin entra con su usuario de Medusa; el token queda en el navegador y se envía en cada pedido al servidor.
+2. **Productos.** Alta, edición, baja y publicación pasan por `/api/admin/proxy/*`, que reenvía a la API admin de Medusa con el token.
+3. **Stock.** La lista muestra el stock por talle y color. Al editar, la matriz se guarda con `POST /admin/stock` en el backend.
+4. **Pedidos y clientes.** `/api/orders` y `/api/customers` leen Supabase y exigen un token de admin válido (`lib/admin-auth.ts`).
+
+## Estructura
+
+```
+src/app/                  páginas de la tienda y del panel (/admin)
+src/app/api/              rutas de servidor (checkout, webhook, pedidos, proxy admin)
+src/lib/checkout.ts       arma el pedido con datos del servidor
+src/lib/notify.ts         email al dueño
+src/lib/admin-auth.ts     validación del token de admin
+src/lib/medusa-store.ts   lectura del catálogo
+src/lib/medusa.ts         llamadas del panel al backend
+src/store/                estado del carrito y del panel
+```
+
+## Variables de entorno
+
+Se cargan en Vercel (Settings → Environment Variables) y, para desarrollo, en `.env.local`. Ningún valor va en el repositorio.
+
+| Variable | Para qué |
+|---|---|
+| `NEXT_PUBLIC_MEDUSA_URL` | URL del backend |
+| `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY` | Clave pública de Medusa |
+| `NEXT_PUBLIC_MEDUSA_REGION_ID` | Región (Argentina, ARS) |
+| `MERCADO_PAGO_ACCESS_TOKEN` | Clave privada de MercadoPago |
+| `SUPABASE_URL` | Proyecto de Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave privada de Supabase |
+| `STOCK_ADJUST_SECRET` | Secret compartido con el backend para descontar stock |
+| `RESEND_API_KEY` | Clave de Resend |
+| `OWNER_EMAIL` | Email que recibe el aviso de cada compra |
+| `RESEND_FROM` | Remitente; solo con dominio propio verificado en Resend |
+
+Las variables sin `NEXT_PUBLIC_` son secretas: no agregarles ese prefijo.
+
+## Desarrollo local
+
+```bash
+npm install
+```
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La tienda queda en http://localhost:3000. Con el `.env.local` habitual, el frontend local usa el backend y la base de producción: lo que se cambie en el panel es real.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El pago con MercadoPago no se puede completar contra `localhost`, porque MercadoPago necesita una dirección pública para avisar del pago. Para probarlo, usar el sitio desplegado.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Antes de subir cambios:
 
-## Learn More
+```bash
+npx tsc --noEmit
+```
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Cada push a `main` despliega en Vercel. El backend se despliega en Render con cada push a `main` de su repositorio. Si un cambio toca los dos, desplegar primero el backend.
 
-## Deploy on Vercel
+## Seguridad
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Las rutas con datos de pedidos y clientes exigen sesión de admin.
+- El stock solo se modifica con sesión de admin (`/admin/stock`) o con el secret del servidor (`/store/stock`).
+- El checkout nunca usa precios ni descuentos enviados por el navegador.
+- El webhook confirma cada pago consultando a MercadoPago.
+- No guardar contraseñas, tokens ni claves en ningún archivo del repositorio: es público.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pendientes conocidos
+
+- Los códigos de descuento no se validan ni se aplican al cobro.
+- No se pueden agregar ni quitar talles o colores de un producto ya creado.
+- El cliente no recibe un email propio de la tienda (requiere dominio verificado en Resend).
+- El costo de envío no se calcula: se coordina con el cliente.

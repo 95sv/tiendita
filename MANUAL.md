@@ -2,22 +2,23 @@
 
 ## Índice
 
-1. [Panel Admin - Acceso](#acceso)
-2. [Gestión de Productos](#productos)
-3. [Gestión de Pedidos](#pedidos)
-4. [Gestión de Clientes](#clientes)
-5. [Promociones y Descuentos](#promociones)
-6. [Procesamiento de Pagos](#pagos)
-7. [Cuándo falla algo - troubleshooting](#troubleshooting)
-8. [Checklist diario/semanal](#checklist)
+1. [Acceso al Panel Admin](#1-acceso-al-panel-admin)
+2. [Gestión de Productos](#2-gestión-de-productos)
+3. [Gestión de Pedidos](#3-gestión-de-pedidos)
+4. [Gestión de Clientes](#4-gestión-de-clientes)
+5. [Promociones y Descuentos](#5-promociones-y-descuentos)
+6. [Procesamiento de Pagos](#6-procesamiento-de-pagos)
+7. [Troubleshooting - Cuando falla algo](#7-troubleshooting---cuando-falla-algo)
+8. [Checklist](#8-checklist)
 
 ---
 
 ## 1. Acceso al Panel Admin
 
 - **URL**: `https://laloya.vercel.app/admin`
-- **Email**: `admin@laloya.com`
-- **Contraseña**: `LaLoya2026!`
+- **Usuario y contraseña**: se entregan por un canal privado. No anotarlos en este archivo ni en ningún archivo del repositorio: el repositorio es público.
+- La sesión vence sola; cuando pasa, el panel vuelve a la pantalla de ingreso.
+- Para cambiar la contraseña, ver el README del backend (`set-admin-password`).
 
 ---
 
@@ -25,98 +26,80 @@
 
 ### Crear un producto
 1. Ir a **Productos** → **Nuevo producto**
-2. Completar: nombre, descripción, precio (en ARS)
-3. Seleccionar colección (Remeras, Pantalones, Camperas, etc.)
-4. Agregar opciones: Talle (S, M, L, XL) y Color
-5. Crear variantes para cada combinación talle+color
-6. Subir imágenes (usar URLs de Unsplash o subir propias)
+2. Completar nombre, descripción y precio (en pesos, sin centavos: `14000` es $14.000)
+3. Elegir categoría (Hombres, Mujeres u Ofertas) y, si se quiere, subcategoría
+4. Agregar las imágenes por URL
+5. Cargar los talles y elegir los colores de la paleta
+6. Completar el **stock por talle y color**
 7. Guardar
 
-### Cambiar estado de un producto
-- **Publicado**: visible en la tienda
-- **Borrador**: oculto de la tienda
-- Hacer clic en el ojo (👁) para alternar
+Los talles y colores se definen al crear el producto. Después no se pueden agregar ni quitar: para cambiarlos hay que crear el producto de nuevo.
 
-### Actualizar stock
-1. Ir a **Productos** → seleccionar producto → editar
-2. Seleccionar colores desde la paleta (se deselecciona para quitar)
-3. En **Stock por talle y color**, completar la cantidad para cada combinación
-4. El total se calcula automáticamente
-5. Guardar cambios
+### Cambiar estado de un producto
+- **Activo**: visible en la tienda
+- **Inactivo**: oculto de la tienda
+- Hacer clic en el botón de estado para alternar
+
+### Ver y actualizar stock
+- La lista de **Productos** muestra el stock de cada producto por talle y color; lo que está en 0 aparece en rojo. Se puede filtrar por Hombres, Mujeres y Ofertas.
+- Para cambiarlo: lápiz (editar) → **Stock por talle y color** → completar las cantidades → **Guardar cambios**.
+- Si aparece un mensaje de error al guardar, los cambios no quedaron guardados: copiar el mensaje y avisar.
 
 ### Stock automático en pagos
-- Cuando MercadoPago aprueba un pago, el webhook descuenta el stock de cada variante automáticamente
-- Es idempotente: si el mismo pago llega dos veces, solo descuenta una vez
-- El stock nunca baja de 0
+- Cuando MercadoPago aprueba un pago, se descuenta el stock del talle y color comprados.
+- Si MercadoPago avisa dos veces del mismo pago, se descuenta una sola vez.
+- El stock nunca baja de 0, y la tienda no deja comprar más unidades de las que hay.
 
 ### Paleta de colores estándar
 Blanco, Negro, Gris, Azul, Rojo, Verde, Amarillo, Marrón, Rosa, Naranja, Beige, Bordó
-Los hex se resuelven automáticamente desde `lib/colors.ts`.
 
 ### Eliminar un producto
-- Hacer clic en la papelera (🗑) → confirmar
+- Hacer clic en la papelera → confirmar
 
 ---
 
 ## 3. Gestión de Pedidos
 
 ### Ver pedidos
-- Ir a **Pedidos** en el sidebar
-- Cada pedido muestra: referencia, cliente, estado, total, fecha
+- Ir a **Pedidos** en el menú
+- Cada pedido muestra: referencia, cliente, estado, total y fecha
 
 ### Cambiar estado de un pedido
-1. Hacer clic en el ojo (👁) para ver detalle
+1. Hacer clic en el ojo para ver el detalle
 2. Usar los botones de estado:
    - **Aprobado** → pago confirmado, preparar envío
-   - **Pendiente** → esperando confirmación de pago
+   - **Pendiente** → el cliente abrió el pago pero todavía no se acreditó
    - **Rechazado** → pago no acreditado
    - **Cancelado** → cliente canceló
    - **Reembolsado** → devolución procesada
-3. El estado se actualiza inmediatamente
+
+Cambiar el estado a mano **no** modifica el stock: si se aprueba o cancela un pedido manualmente, hay que ajustar el stock desde Productos.
 
 ### Exportar pedidos a Excel
-- Hacer clic en **Exportar CSV** arriba a la derecha
-- Se descarga un archivo `.csv` que se puede abrir en Excel
+- **Exportar CSV** arriba a la derecha; el archivo se abre en Excel
 
 ### Flujo normal de un pedido
 ```
-Pendiente → Aprobado → (despachar) → Completado
+Pendiente (cliente abre el pago) → Aprobado (pago acreditado, stock descontado, aviso por email) → despachar
 ```
 
-### Si el webhook de MercadoPago no actualiza el estado
-El estado queda en "Pendiente" después de que el cliente paga. Solución:
-1. Ir a MercadoPago Dashboard → **Pagos**
-2. Buscar el pago por el monto o email del cliente
-3. Verificar que el estado sea "Aprobado"
-4. En el panel de La Loya, abrir el pedido y cambiar a **Aprobado** manualmente
+Es normal que queden pedidos en **Pendiente**: son clientes que llegaron a MercadoPago y no terminaron de pagar.
 
 ---
 
 ## 4. Gestión de Clientes
 
-- Ir a **Clientes** en el sidebar
-- Muestra: nombre, email, teléfono, cantidad de pedidos, gasto total
-- Se actualiza automáticamente cuando se crea un pedido
-- Se puede exportar a CSV
+- Ir a **Clientes** en el menú
+- Muestra: nombre, email, teléfono, cantidad de pedidos y gasto total
+- Se arma a partir de los pedidos; se puede exportar a CSV
 
 ---
 
 ## 5. Promociones y Descuentos
 
-### Crear una promoción
-1. Ir a **Promociones** → **Nueva promoción**
-2. Completar:
-   - **Código**: ej. `VERANO2026` (se usa en mayúsculas)
-   - **Tipo**: Porcentaje (%) o Monto fijo ($)
-   - **Valor**: ej. `10` (para 10%) o `5000` (para $5000 off)
-   - **Fechas** (opcional): inicio y fin de vigencia
-3. Crear
+Los códigos de descuento todavía **no funcionan en la tienda**: se pueden crear desde **Promociones**, pero el checkout no los puede validar ni aplicar al cobro. Hasta que se implemente, no comunicar códigos a clientes.
 
-### Eliminar una promoción
-- Hacer clic en la papelera (🗑)
-
-### Nota
-Las promociones se crean en MedusaJS pero el checkout actual usa MercadoPago directo. Para aplicar descuentos reales, se necesita integrar el código de promoción en el checkout. Por ahora, las promociones sirven como registro interno.
+Para poner un producto en oferta, usar el **precio original** al editarlo: la tienda muestra el precio tachado y el precio de oferta.
 
 ---
 
@@ -124,103 +107,84 @@ Las promociones se crean en MedusaJS pero el checkout actual usa MercadoPago dir
 
 ### Cómo funciona
 1. El cliente elige productos → carrito → checkout
-2. Completa datos y elige "Mercado Pago"
-3. Se redirige a MercadoPago para pagar
-4. Al aprobarse, MercadoPago notifica al webhook
-5. El pedido se guarda en Supabase como "Pendiente"
-6. Si el webhook funciona, se actualiza a "Aprobado"
-7. Si no, actualizar manualmente desde el admin
+2. Completa sus datos y elige "Mercado Pago"
+3. La tienda verifica precio y stock, guarda el pedido como **Pendiente** y lo envía a MercadoPago
+4. Cuando el pago se acredita, MercadoPago le avisa a la tienda (webhook)
+5. La tienda marca el pedido como **Aprobado**, descuenta el stock y le envía un email al dueño
 
-### Credenciales MercadoPago
-- **Prueba (sandbox)**: para testear sin cobro real
-- **Producción**: para cobrar de verdad
-- Se cambian en Vercel → Environment Variables
+### Credenciales de MercadoPago
+- Se cargan en Vercel → Settings → Environment Variables → `MERCADO_PAGO_ACCESS_TOKEN`. Después de cambiarla hay que volver a desplegar.
+- **Para probar**: el access token de producción (`APP_USR-...`) del *vendedor de prueba*.
+- **Para cobrar de verdad**: el access token de producción (`APP_USR-...`) de la cuenta real del negocio.
 
-### Tarjetas de prueba (modo sandbox)
-| Campo | Valor |
-|-------|-------|
-| Número | `5031 7557 3453 0604` |
-| Vencimiento | `11/25` |
-| CVV | `123` |
-| DNI | `12345678` |
+### Cómo hacer una compra de prueba
+1. Abrir la tienda en una ventana de incógnito
+2. En MercadoPago, iniciar sesión con el **comprador de prueba** (no con el vendedor de prueba ni con una cuenta real)
+3. Pagar con "Dinero en cuenta"
 
 ### Transferencia bancaria
-- El cliente elige "Transferencia bancaria" en el checkout
-- Se le muestra un mensaje para coordinar por WhatsApp
-- No se procesa automáticamente → crear pedido manual si confirma
+- El cliente elige "Transferencia bancaria" en el checkout y se le indica coordinar por WhatsApp
+- No genera pedido automáticamente
 
 ---
 
 ## 7. Troubleshooting - Cuando falla algo
 
 ### La tienda no carga productos
-**Causa probable**: Render (backend) está dormido (plan gratuito)
-**Solución**:
+**Causa probable**: el backend en Render está dormido (plan gratuito)
 1. Esperar 30-60 segundos y recargar
-2. Si persiste, verificar: https://la-loya-backend.onrender.com/health
-3. Si no responde, Render está despertándose, esperar 2 minutos
-4. Si sigue fallando, contactar soporte de Render
+2. Verificar https://la-loya-backend.onrender.com/health
+3. Si no responde después de 2 minutos, revisar el panel de Render
+
+### El checkout dice "No pudimos verificar tu pedido"
+La tienda no pudo consultar precios y stock porque el backend está dormido o caído. Reintentar en un minuto.
+
+### El checkout dice que el precio cambió
+El cliente tenía el producto en el carrito desde antes de un cambio de precio. Tiene que quitarlo y volver a agregarlo.
 
 ### El admin no carga datos
-**Causa**: Las llamadas a la API fallan
-**Solución**:
-1. Abrir consola del navegador (F12 → Console)
-2. Buscar errores en rojo
-3. Si dice "CORS" o "fetch failed", el backend puede estar caído
-4. Si dice "401" o "403", cerrar sesión y volver a entrar
+1. Si vuelve a la pantalla de ingreso, la sesión venció: ingresar de nuevo
+2. Si la lista de productos muestra un cartel de error, copiar el mensaje
+3. Si no carga nada, el backend puede estar dormido (ver arriba)
 
 ### El pago se queda en "Pendiente"
-**Causa**: El webhook de MercadoPago no llegó
-**Solución**:
-1. Ir a MercadoPago Dashboard → Pagos
-2. Verificar que el pago esté aprobado
-3. Si está aprobado, cambiar estado manualmente en el admin
+1. Verificar en MercadoPago que el pago esté aprobado
+2. Si está aprobado y pasaron varios minutos, cambiar el estado a mano en el admin y ajustar el stock
 
-### El cliente no recibe email de confirmación
-**Causa**: Resend no está configurado o la API key es inválida
-**Solución**:
-1. Verificar en Vercel que `RESEND_API_KEY` esté configurada
-2. Verificar que el dominio de Resend esté verificado
-3. Si no está configurado, el email se omite silenciosamente (el pedido igual se guarda)
+### MercadoPago muestra "Oh, no, algo anduvo mal" o "Una de las partes es de prueba"
+Se mezclaron cuentas de prueba y reales, o se intentó pagar con el propio vendedor. Con credenciales de prueba hay que pagar con el comprador de prueba, en incógnito. Con credenciales reales hay que pagar con una cuenta real distinta a la del negocio.
+
+### No llega el email de aviso de compra
+1. Verificar en Vercel `RESEND_API_KEY` y `OWNER_EMAIL`
+2. Sin dominio propio verificado en Resend, el aviso solo puede llegar al email con el que se creó la cuenta de Resend, y `RESEND_FROM` tiene que estar vacía
+3. Revisar la carpeta de spam
+4. El pedido se guarda igual aunque el email falle
 
 ### El stock no se descuenta
-**Causa actual**: El stock se maneja manualmente
-**Solución**: Actualizar el stock desde **Productos** → seleccionar → editar variantes
-
-### MercadoPago muestra "Una de las partes es de prueba"
-**Causa**: Mezcla de credenciales de prueba y producción
-**Solución**:
-1. Verificar que en Vercel las credenciales sean todas de prueba (empiezan con `TEST-`) o todas de producción (empiezan con `APP_USR-`)
-2. No mezclar
-
-### La página de producto no carga / muestra error
-**Causa**: El handle del producto tiene caracteres especiales
-**Solución**:
-1. Ir al admin → Productos
-2. Verificar que los handles sean ASCII (sin ñ, tildes, etc.)
-3. Los handles se generan automáticamente al crear el producto
+1. Verificar que el pedido haya pasado a "Aprobado" (si sigue pendiente, el pago no se acreditó)
+2. Verificar que `STOCK_ADJUST_SECRET` tenga el mismo valor en Vercel y en Render
+3. Si el backend estaba dormido, MercadoPago reintenta el aviso solo
 
 ---
 
 ## 8. Checklist
 
 ### Diario (5 min)
-- [ ] Revisar pedidos pendientes en el admin
-- [ ] Cambiar a "Aprobado" los pagos confirmados en MercadoPago
+- [ ] Revisar los pedidos aprobados y despacharlos
 - [ ] Responder consultas de WhatsApp
 
 ### Semanal (15 min)
-- [ ] Revisar stock de productos más vendidos
+- [ ] Revisar en Productos qué talles y colores quedaron en 0
 - [ ] Verificar que las imágenes de los productos se carguen
-- [ ] Revisar la sección de clientes para ver nuevos compradores
-- [ ] Exportar CSV de pedidos para tener respaldo
+- [ ] Exportar el CSV de pedidos para tener respaldo
 
-### Antes de cambiar a producción
-- [ ] Cambiar credenciales de MercadoPago de TEST a producción
-- [ ] Verificar que Resend tenga el dominio verificado para emails
-- [ ] Probar una compra real con tarjeta (monto bajo)
-- [ ] Verificar que el webhook actualice el estado automáticamente
-- [ ] Revisar que todos los productos tengan imágenes y precios correctos
+### Antes de abrir la tienda al público
+- [ ] Cambiar la contraseña del admin
+- [ ] Reemplazar las credenciales de MercadoPago por las de la cuenta real del negocio
+- [ ] Configurar el aviso por email (Resend)
+- [ ] Cargar productos, precios y stock reales; borrar los de prueba
+- [ ] Borrar los pedidos de prueba
+- [ ] Hacer una compra real de monto bajo y verificar pedido aprobado, stock y email
 
 ---
 
@@ -231,9 +195,9 @@ Las promociones se crean en MedusaJS pero el checkout actual usa MercadoPago dir
 | Tienda | https://laloya.vercel.app |
 | Admin | https://laloya.vercel.app/admin |
 | Backend MedusaJS | https://la-loya-backend.onrender.com |
-| MercadoPago Dashboard | https://www.mercadopago.com.ar/developers/panel/app |
-| Supabase Dashboard | https://supabase.com/dashboard/project/qtwivutgmrwiielyqoqp |
-| Vercel Dashboard | https://vercel.com/dashboard |
-| GitHub Repositorio | https://github.com/95sv/tiendita |
+| MercadoPago Developers | https://www.mercadopago.com.ar/developers/panel/app |
+| Supabase | https://supabase.com/dashboard |
+| Vercel | https://vercel.com/dashboard |
+| Resend | https://resend.com |
 
-<!-- Last updated: 2026-07-21 13:38 -->
+<!-- Last updated: 2026-10-12 -->
