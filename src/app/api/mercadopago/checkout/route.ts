@@ -117,7 +117,10 @@ export async function POST(req: NextRequest) {
       total,
     }).catch(console.error)
 
-    return NextResponse.json({ url: result.sandbox_init_point || result.init_point })
+    // sandbox_init_point es para credenciales TEST-; con credenciales APP_USR
+    // (reales o de un usuario de prueba) se usa init_point.
+    const sandbox = (process.env.MERCADO_PAGO_ACCESS_TOKEN || "").startsWith("TEST-")
+    return NextResponse.json({ url: (sandbox && result.sandbox_init_point) || result.init_point })
   } catch (error) {
     console.error("MercadoPago error:", error)
     return NextResponse.json(
