@@ -36,6 +36,12 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 - Auth vía Medusa token en `localStorage` (`medusa_admin_token`).
 - Proxy: `/api/admin/proxy/[...path]` reenvía con `x-publishable-api-key` + `Authorization`.
 - Categoría = colección Medusa (sufijo " Mujer" / " Ofertas").
+- Las rutas propias con datos de pedidos (`/api/orders`, `/api/customers`) exigen el token de admin: `requireAdmin` (`lib/admin-auth.ts`) lo valida contra Medusa; desde el panel se llaman con `adminApiFetch`.
+
+## Checkout
+- `resolveCheckoutItems` (`lib/checkout.ts`) arma el pedido con nombre, precio y stock tomados de Medusa. Del navegador solo se toma producto, talle, color y cantidad; nunca usar precios ni descuentos que mande el cliente.
+- Si el catálogo no responde, el checkout se rechaza (no hay precio confiable).
+- `/api/send-order-email` arma el email desde el pedido guardado en `pedidos` (por `external_reference`).
 
 ## Backend Medusa
 - `admin: { disable: true }` en medusa-config (API funciona, UI deshabilitada).

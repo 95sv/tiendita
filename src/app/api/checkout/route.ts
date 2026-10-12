@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
+import { resolveCheckoutItems } from "@/lib/checkout"
+
+// Verificar el pedido contra Medusa puede tardar si el backend está dormido
+export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,8 +11,9 @@ export async function POST(req: NextRequest) {
 
     const { items, email, name, phone, address, city, postalCode, province } = await req.json()
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: "No items provided" }, { status: 400 })
+    const resolved = await resolveCheckoutItems(items)
+    if ("error" in resolved) {
+      return NextResponse.json({ error: resolved.error }, { status: resolved.status })
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -25,15 +30,15 @@ export async function POST(req: NextRequest) {
         customer_postal_code: postalCode,
         customer_province: province,
       },
-      line_items: items.map((item: { name: string; price: number; quantity: number; size?: string }) => ({
+      line_items: resolved.lines.map((line) => ({
         price_data: {
           currency: "ars",
           product_data: {
-            name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+            name: line.name + (line.size ? ` - Talle ${line.size}` : ""),
           },
-          unit_amount: item.price,
+          unit_amount: line.price,
         },
-        quantity: item.quantity,
+        quantity: line.quantity,
       })),
     })
 

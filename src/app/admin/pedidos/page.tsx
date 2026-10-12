@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { formatPrice } from "@/lib/utils"
+import { adminApiFetch } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
 import { ShoppingCart, Eye, X, Download } from "lucide-react"
 import { exportToCSV } from "@/lib/export-csv"
@@ -156,11 +157,12 @@ export default function PedidosPage() {
   const [selectedOrder, setSelectedOrder] = useState<SupabaseOrder | null>(null)
 
   const handleStatusChange = async (id: string, status: string) => {
-    await fetch("/api/orders", {
+    const res = await adminApiFetch("/api/orders", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status }),
     })
+    if (!res.ok) return
     setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o))
     if (selectedOrder?.id === id) {
       setSelectedOrder((prev) => prev ? { ...prev, status } : null)
@@ -168,8 +170,8 @@ export default function PedidosPage() {
   }
 
   useEffect(() => {
-    fetch("/api/orders")
-      .then((r) => r.json())
+    adminApiFetch("/api/orders")
+      .then((r) => (r.ok ? r.json() : []))
       .then((data: SupabaseOrder[]) => {
         setOrders(data)
         setLoading(false)

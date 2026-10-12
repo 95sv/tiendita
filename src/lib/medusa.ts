@@ -46,13 +46,31 @@ function headers(extra?: Record<string, string>) {
   }
 }
 
-async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
+function adminAuthHeaders(): Record<string, string> {
   const token = typeof window !== "undefined" ? localStorage.getItem("medusa_admin_token") : null
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+// Rutas propias del panel (/api/orders, /api/customers): mandan el token de
+// admin y, si la sesión venció, vuelven a la pantalla de login.
+export async function adminApiFetch(path: string, init?: RequestInit): Promise<Response> {
+  const res = await fetch(path, {
+    ...init,
+    headers: { ...init?.headers, ...adminAuthHeaders() },
+  })
+  if (res.status === 401) {
+    adminLogout()
+    window.location.reload()
+  }
+  return res
+}
+
+async function adminFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${PROXY}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...adminAuthHeaders(),
       ...options?.headers,
     },
   })

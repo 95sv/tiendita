@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { formatPrice } from "@/lib/utils"
+import { adminApiFetch } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
 import { Users, Download } from "lucide-react"
 import { exportToCSV } from "@/lib/export-csv"
@@ -27,8 +28,8 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/customers")
-      .then((r) => r.json())
+    adminApiFetch("/api/customers")
+      .then((r) => (r.ok ? r.json() : []))
       .then((data: Customer[]) => {
         setCustomers(data)
         setLoading(false)

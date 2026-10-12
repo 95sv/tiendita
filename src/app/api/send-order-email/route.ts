@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { supabase } from "@/lib/supabase"
 
 let resend: import("resend").Resend | null = null
 function getResend() {
@@ -90,11 +91,21 @@ function buildOrderEmail(data: {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { name, email, items, total, address, city, province } = body
+    const { external_reference } = await req.json()
 
-    if (!items || !total) {
+    if (typeof external_reference !== "string" || !external_reference) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // El contenido del email sale del pedido guardado, no de lo que mande el navegador
+    const { data: order } = await supabase
+      .from("pedidos")
+      .select("customer_name, customer_address, customer_city, customer_province, items, total")
+      .eq("external_reference", external_reference)
+      .maybeSingle()
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 })
     }
 
     if (!process.env.RESEND_API_KEY) {
@@ -109,7 +120,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, skipped: true })
     }
 
-    const html = buildOrderEmail({ name: name || "Cliente", items, total, address, city, province })
+    const html = buildOrderEmail({
+      name: order.customer_name || "Cliente",
+      items: order.items || [],
+      total: order.total || 0,
+      address: order.customer_address || "",
+      city: order.customer_city || "",
+      province: order.customer_province || "",
+    })
 
     const result = await resendClient.emails.send({
       from: process.env.RESEND_FROM || "La Loya <onboarding@resend.dev>",

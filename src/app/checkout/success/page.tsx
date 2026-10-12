@@ -13,26 +13,13 @@ function SuccessContent() {
 
   useEffect(() => {
     const cartItems = useCartStore.getState().items
-    const total = useCartStore.getState().getTotal()
+    const externalReference = searchParams.get("external_reference")
 
-    if (cartItems.length > 0) {
+    if (cartItems.length > 0 && externalReference) {
       fetch("/api/send-order-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Cliente",
-          email: "cliente@example.com",
-          items: cartItems.map((i) => ({
-            name: i.product.name,
-            size: i.size,
-            quantity: i.quantity,
-            price: i.product.price,
-          })),
-          total,
-          address: "A coordinar",
-          city: "Bahia Blanca",
-          province: "Buenos Aires",
-        }),
+        body: JSON.stringify({ external_reference: externalReference }),
       })
         .then(() => setStatus("sent"))
         .catch(() => setStatus("error"))
@@ -40,7 +27,7 @@ function SuccessContent() {
     } else {
       setStatus("sent")
     }
-  }, [clearCart])
+  }, [clearCart, searchParams])
 
   return (
     <div className="mx-auto max-w-lg px-4 py-20 text-center">

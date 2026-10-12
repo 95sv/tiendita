@@ -3,73 +3,54 @@ import { Preference } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
 import { supabase } from "@/lib/supabase"
 import { notifyOwnerNewOrder } from "@/lib/notify"
-import { getAllProducts } from "@/lib/medusa-store"
-import type { Product } from "@/types"
+import { resolveCheckoutItems } from "@/lib/checkout"
+import { lookupPromo, discountFor } from "@/lib/promo"
 
-interface CheckoutItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  size?: string
-  color?: string
-  variant_id?: string
-}
+// Verificar el pedido contra Medusa puede tardar si el backend está dormido
+export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, name, email, address, city, postalCode, province, phone, promoCode, discount } =
-      (await req.json()) as { items?: CheckoutItem[] } & Record<string, any>
+    const { items, name, email, address, city, postalCode, province, phone, promoCode, discount: claimedDiscount } = await req.json()
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: "No items provided" }, { status: 400 })
+    const resolved = await resolveCheckoutItems(items)
+    if ("error" in resolved) {
+      return NextResponse.json({ error: resolved.error }, { status: resolved.status })
     }
-
-    // Resuelve la variante (talle + color) de cada item y valida el stock.
-    // Si Medusa no responde a tiempo no se bloquea la venta.
-    const products = await Promise.race([
-      getAllProducts(),
-      new Promise<Product[]>((resolve) => setTimeout(() => resolve([]), 8000)),
-    ])
-    for (const item of items) {
-      const product = products.find((p) => p.id === item.id)
-      const sameSize = product?.variants?.filter((v) => v.size === item.size) || []
-      const variant =
-        product?.variants?.find((v) => v.id === item.variant_id) ??
-        sameSize.find((v) => v.color === (item.color || "Único")) ??
-        (sameSize.length === 1 ? sameSize[0] : undefined)
-      if (!product || !variant) continue
-
-      item.variant_id = variant.id
-      if (variant.stock < item.quantity) {
-        const detail = [`talle ${variant.size}`, variant.color !== "Único" ? variant.color : ""]
-          .filter(Boolean)
-          .join(", ")
-        return NextResponse.json(
-          {
-            error:
-              variant.stock > 0
-                ? `Solo quedan ${variant.stock} de ${product.name} (${detail}).`
-                : `${product.name} (${detail}) no tiene stock.`,
-          },
-          { status: 409 }
-        )
-      }
-    }
+    const { lines } = resolved
 
     const origin = req.headers.get("origin") || "https://laloya.vercel.app"
     const externalRef = `order_${Date.now()}`
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const total = Math.max(0, subtotal - (discount || 0))
+    const subtotal = lines.reduce((sum, line) => sum + line.price * line.quantity, 0)
+
+    // El descuento se recalcula acá: lo que manda el navegador solo indica
+    // que el cliente aplicó un código.
+    let discount = 0
+    let appliedCode = ""
+    if (typeof promoCode === "string" && promoCode.trim() && Number(claimedDiscount) > 0) {
+      const result = await lookupPromo(promoCode.trim()).catch(() => null)
+      if (result && "promo" in result) {
+        discount = discountFor(result.promo, subtotal)
+        appliedCode = result.promo.code
+      }
+    }
+    const total = Math.max(0, subtotal - discount)
+
+    const orderItems = lines.map((line) => ({
+      name: line.name + (line.size ? ` - Talle ${line.size}` : "") + (line.color && line.color !== "Único" ? ` - ${line.color}` : ""),
+      quantity: line.quantity,
+      price: line.price,
+      variant_id: line.variant_id,
+    }))
 
     const preference = new Preference(mpClient)
     const result = await preference.create({
       body: {
-        items: items.map((item: { id: string; name: string; price: number; quantity: number; size?: string; color?: string }) => ({
-          id: item.id,
-          title: item.name + (item.size ? ` - Talle ${item.size}` : "") + (item.color && item.color !== "Único" ? ` - ${item.color}` : ""),
-          quantity: item.quantity,
-          unit_price: item.price,
+        items: lines.map((line, index) => ({
+          id: line.id,
+          title: orderItems[index].name,
+          quantity: line.quantity,
+          unit_price: line.price,
           currency_id: "ARS",
         })),
         payer: {
@@ -95,12 +76,7 @@ export async function POST(req: NextRequest) {
           customer_postal_code: postalCode,
           customer_province: province,
           customer_phone: phone,
-          items: JSON.stringify(items.map((item: { name: string; size?: string; color?: string; quantity: number; price: number; variant_id?: string }) => ({
-            name: item.name + (item.size ? ` - Talle ${item.size}` : "") + (item.color && item.color !== "Único" ? ` - ${item.color}` : ""),
-            quantity: item.quantity,
-            price: item.price,
-            variant_id: item.variant_id,
-          }))),
+          items: JSON.stringify(orderItems),
         },
       },
     })
@@ -115,17 +91,12 @@ export async function POST(req: NextRequest) {
       customer_city: city,
       customer_province: province,
       customer_postal_code: postalCode,
-      items: items.map((item: { name: string; size?: string; color?: string; quantity: number; price: number; variant_id?: string }) => ({
-        name: item.name + (item.size ? ` - Talle ${item.size}` : "") + (item.color && item.color !== "Único" ? ` - ${item.color}` : ""),
-        quantity: item.quantity,
-        price: item.price,
-        variant_id: item.variant_id,
-      })),
+      items: orderItems,
       total,
       currency: "ARS",
       payment_method: "",
-      promo_code: promoCode || "",
-      discount: discount || 0,
+      promo_code: appliedCode,
+      discount,
     })
 
     notifyOwnerNewOrder({
@@ -136,11 +107,7 @@ export async function POST(req: NextRequest) {
       customer_address: address,
       customer_city: city,
       customer_province: province,
-      items: items.map((item: { name: string; size?: string; quantity: number; price: number }) => ({
-        name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
-        quantity: item.quantity,
-        price: item.price,
-      })),
+      items: orderItems,
       total,
     }).catch(console.error)
 
