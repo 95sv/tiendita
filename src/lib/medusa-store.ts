@@ -123,7 +123,7 @@ function medusaToProduct(p: StoreProduct): Product {
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const res = await fetch(
-      `${MEDUSA_URL}/store/products?limit=100&fields=+variants.inventory_quantity${REGION_ID ? `&region_id=${REGION_ID}` : ""}`,
+      `${MEDUSA_URL}/store/products-stock${REGION_ID ? `?region_id=${REGION_ID}` : ""}`,
       {
         headers: { "x-publishable-api-key": API_KEY },
         cache: "no-store",

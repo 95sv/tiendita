@@ -91,7 +91,7 @@ export function isAdminLoggedIn(): boolean {
 
 export async function fetchProducts(): Promise<MedusaProduct[]> {
   const data = await adminFetch<{ products: MedusaProduct[] }>(
-    "/admin/products?limit=100&fields=+variants.inventory_quantity"
+    "/admin/products-with-stock"
   )
   return data.products
 }
