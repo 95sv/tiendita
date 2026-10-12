@@ -177,5 +177,20 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  return NextResponse.json({ credential, account, orders })
+  const recent = await mp("/v1/payments/search?sort=date_created&criteria=desc&limit=5")
+  const recent_payments =
+    recent.http === 200
+      ? (recent.data?.results || []).map((p: any) => ({
+          id: p.id,
+          status: p.status,
+          status_detail: p.status_detail,
+          payment_method_id: p.payment_method_id,
+          transaction_amount: p.transaction_amount,
+          date_created: p.date_created,
+          external_reference: p.external_reference,
+          payer_id: p.payer?.id,
+        }))
+      : { http: recent.http, error: recent.data }
+
+  return NextResponse.json({ credential, account, orders, recent_payments })
 }
