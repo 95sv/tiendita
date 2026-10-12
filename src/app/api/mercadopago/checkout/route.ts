@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { Preference } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
 import { supabase } from "@/lib/supabase"
-import { notifyOwnerNewOrder } from "@/lib/notify"
 import { resolveCheckoutItems } from "@/lib/checkout"
 import { lookupPromo, discountFor } from "@/lib/promo"
 
@@ -104,18 +103,6 @@ export async function POST(req: NextRequest) {
       promo_code: appliedCode,
       discount,
     })
-
-    notifyOwnerNewOrder({
-      external_reference: externalRef,
-      customer_name: name,
-      customer_email: email,
-      customer_phone: phone,
-      customer_address: address,
-      customer_city: city,
-      customer_province: province,
-      items: orderItems,
-      total,
-    }).catch(console.error)
 
     // sandbox_init_point es para credenciales TEST-; con credenciales APP_USR
     // (reales o de un usuario de prueba) se usa init_point.

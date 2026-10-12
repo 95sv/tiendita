@@ -42,6 +42,11 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 - `resolveCheckoutItems` (`lib/checkout.ts`) arma el pedido con nombre, precio y stock tomados de Medusa. Del navegador solo se toma producto, talle, color y cantidad; nunca usar precios ni descuentos que mande el cliente.
 - Si el catálogo no responde, el checkout se rechaza (no hay precio confiable).
 - `/api/send-order-email` arma el email desde el pedido guardado en `pedidos` (por `external_reference`).
+- La URL de pago es `init_point`; `sandbox_init_point` solo se usa si el access token empieza con `TEST-`.
+
+## Notificación al dueño
+- `notifyOwnerNewOrder` (`lib/notify.ts`) envía un email con Resend cuando el webhook de MercadoPago aprueba un pago por primera vez (no al crear el checkout). Se espera con `await`: en Vercel una promesa suelta se corta al responder.
+- Variables (Vercel, server-side): `RESEND_API_KEY`, `OWNER_EMAIL` y opcional `RESEND_FROM`. Sin dominio verificado en Resend solo se puede enviar desde `onboarding@resend.dev` hacia el email de la cuenta de Resend.
 
 ## Backend Medusa
 - `admin: { disable: true }` en medusa-config (API funciona, UI deshabilitada).

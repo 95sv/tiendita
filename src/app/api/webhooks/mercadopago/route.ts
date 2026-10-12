@@ -59,8 +59,6 @@ export async function POST(req: NextRequest) {
             .eq("external_reference", paymentData.external_reference)
             .maybeSingle()
 
-          const alreadyApproved = existingOrder?.status === "approved"
-
           // Los items guardados al crear el checkout mandan; la metadata de MP es respaldo
           const items =
             Array.isArray(existingOrder?.items) && existingOrder.items.length > 0
@@ -69,41 +67,61 @@ export async function POST(req: NextRequest) {
               ? JSON.parse(metadata.items)
               : []
 
-          await supabase.from("pedidos").upsert(
-            {
-              external_reference: paymentData.external_reference,
-              payment_id: String(paymentData.id),
-              status: "approved",
-              customer_name: metadata.customer_name || "",
-              customer_email: metadata.customer_email || paymentData.payer?.email || "",
-              customer_phone: metadata.customer_phone || "",
-              customer_address: metadata.customer_address || "",
-              customer_city: metadata.customer_city || "",
-              customer_province: metadata.customer_province || "",
-              customer_postal_code: metadata.customer_postal_code || "",
-              items,
-              total: paymentData.transaction_amount,
-              currency: paymentData.currency_id || "ARS",
-              payment_method: paymentData.payment_method_id || "",
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "external_reference" }
-          )
+          const approved = {
+            external_reference: paymentData.external_reference,
+            payment_id: String(paymentData.id),
+            status: "approved",
+            customer_name: metadata.customer_name || "",
+            customer_email: metadata.customer_email || paymentData.payer?.email || "",
+            customer_phone: metadata.customer_phone || "",
+            customer_address: metadata.customer_address || "",
+            customer_city: metadata.customer_city || "",
+            customer_province: metadata.customer_province || "",
+            customer_postal_code: metadata.customer_postal_code || "",
+            items,
+            total: paymentData.transaction_amount,
+            currency: paymentData.currency_id || "ARS",
+            payment_method: paymentData.payment_method_id || "",
+            updated_at: new Date().toISOString(),
+          }
+
+          // MercadoPago repite las notificaciones: solo la que logra pasar el
+          // pedido a "approved" avisa al dueño.
+          let firstApproval = true
+          if (existingOrder) {
+            const { data: claimed } = await supabase
+              .from("pedidos")
+              .update(approved)
+              .eq("external_reference", paymentData.external_reference)
+              .neq("status", "approved")
+              .select("external_reference")
+            firstApproval = (claimed?.length || 0) > 0
+          } else {
+            await supabase.from("pedidos").upsert(approved, { onConflict: "external_reference" })
+          }
 
           console.log("Order approved and saved:", paymentData.external_reference)
 
-          if (!alreadyApproved) {
-            notifyOwnerNewOrder({
-              external_reference: paymentData.external_reference || "",
-              customer_name: metadata.customer_name || "",
-              customer_email: metadata.customer_email || paymentData.payer?.email || "",
-              customer_phone: metadata.customer_phone || "",
-              customer_address: metadata.customer_address || "",
-              customer_city: metadata.customer_city || "",
-              customer_province: metadata.customer_province || "",
-              items,
-              total: paymentData.transaction_amount || 0,
-            }).catch(console.error)
+          if (firstApproval) {
+            try {
+              const notified = await notifyOwnerNewOrder({
+                external_reference: approved.external_reference || "",
+                customer_name: approved.customer_name,
+                customer_email: approved.customer_email,
+                customer_phone: approved.customer_phone,
+                customer_address: approved.customer_address,
+                customer_city: approved.customer_city,
+                customer_province: approved.customer_province,
+                customer_postal_code: approved.customer_postal_code,
+                payment_id: approved.payment_id,
+                payment_method: approved.payment_method,
+                items,
+                total: paymentData.transaction_amount || 0,
+              })
+              console.log("Owner notification:", JSON.stringify(notified))
+            } catch (e) {
+              console.error("Owner notification error:", e)
+            }
           }
 
           const stockItems = items
