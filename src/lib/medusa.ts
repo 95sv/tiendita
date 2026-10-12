@@ -168,13 +168,12 @@ export async function updateVariantStock(
   quantity: number,
   mode: "decrement" | "set" = "decrement"
 ): Promise<void> {
-  const res = await fetch(`${MEDUSA_URL}/store/stock/adjust`, {
+  const res = await fetch("/api/admin/stock", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       items: [{ variant_id: variantId, quantity }],
       mode,
-      secret: process.env.NEXT_PUBLIC_STOCK_ADJUST_SECRET || "",
     }),
   })
   if (!res.ok) throw new Error(`Stock adjust failed: ${res.status}`)

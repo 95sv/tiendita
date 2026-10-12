@@ -24,7 +24,8 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 - `lib/colors.ts` exporta `COLOR_PALETTE` (12 colores) y `hexForColor(name)`.
 - Admin edita stock vía matriz en `/admin/productos/[id]`; se persiste a Medusa con `updateVariantStock(id, qty, "set")`.
 - Webhook de MercadoPago descuenta stock con `mode: "decrement"` en `POST /store/stock/adjust` (backend), idempotente chequeando `status` previo.
-- Secret: `STOCK_ADJUST_SECRET` en backend `.env` y `NEXT_PUBLIC_STOCK_ADJUST_SECRET` en frontend `.env.local`.
+- Secret: `STOCK_ADJUST_SECRET` en backend `.env` y frontend `.env.local` (server-side, NO `NEXT_PUBLIC_`).
+- Frontend no llama al backend directamente: usa `/api/admin/stock` (Next.js API route) que agrega el secret server-side.
 
 ## Tipos
 - `Product.variants?: ProductVariant[]` (`{ id, size, color, stock }`) — opcional por fallback en `lib/products.ts`.

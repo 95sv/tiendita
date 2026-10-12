@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
                   body: JSON.stringify({
                     items: stockItems,
                     mode: "decrement",
-                    secret: process.env.NEXT_PUBLIC_STOCK_ADJUST_SECRET || "",
+                    secret: process.env.STOCK_ADJUST_SECRET || "",
                   }),
                 })
                 console.log("Stock adjusted:", res.status)
