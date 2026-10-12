@@ -330,30 +330,36 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
           const newPrice = updates.price ?? existing.price
           const newOriginal = updates.originalPrice ?? existing.originalPrice
           const productName = updates.name ?? existing.name
-          const { fetchPriceLists: fpl, createPriceList: cpl, updatePriceList: upl, deletePriceList: dpl } = await import("@/lib/medusa")
-          const lists = await fpl()
-          const saleList = lists.find((l: any) => l.title === `Sale - ${existing.name}`)
+          const saleChanged =
+            newPrice !== existing.price ||
+            newOriginal !== existing.originalPrice ||
+            productName !== existing.name
 
-          if (newOriginal && newOriginal > 0 && newPrice && newPrice > 0 && newOriginal > newPrice) {
-            const { fetchProduct: fp2 } = await import("@/lib/medusa")
-            const full2 = await fp2(existing.medusaId)
-            const prices = (full2.variants || []).map((v: any) => ({
-              variant_id: v.id,
-              amount: newPrice,
-              currency_code: "ars",
-            }))
+          if (saleChanged) {
+            const { fetchPriceLists: fpl, createPriceList: cpl, deletePriceList: dpl } = await import("@/lib/medusa")
+            const lists = await fpl()
+            const saleList = lists.find((l: any) => l.title === `Sale - ${existing.name}`)
+
+            // Medusa no acepta cambiar los precios de una lista con un update:
+            // la oferta se reemplaza por una lista nueva.
             if (saleList) {
-              await upl(saleList.id, { prices })
-            } else {
+              await dpl(saleList.id)
+            }
+
+            if (newOriginal && newOriginal > 0 && newPrice && newPrice > 0 && newOriginal > newPrice) {
+              const { fetchProduct: fp2 } = await import("@/lib/medusa")
+              const full2 = await fp2(existing.medusaId)
               await cpl({
                 name: `Sale - ${productName}`,
                 description: `Descuento para ${productName}`,
                 type: "sale",
-                prices,
+                prices: (full2.variants || []).map((v: any) => ({
+                  variant_id: v.id,
+                  amount: newPrice,
+                  currency_code: "ars",
+                })),
               })
             }
-          } else if (saleList) {
-            await dpl(saleList.id)
           }
         }
       }
