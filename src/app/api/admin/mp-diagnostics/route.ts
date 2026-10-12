@@ -3,6 +3,7 @@
 import { timingSafeEqual } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
+import { notifyOwnerNewOrder } from "@/lib/notify"
 
 const MP_API = "https://api.mercadopago.com"
 
@@ -38,6 +39,34 @@ export async function GET(req: NextRequest) {
   }
   if (!hasSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  // ?email=1 informa qué variables de email están cargadas; ?email=test además
+  // envía una notificación de prueba al dueño.
+  const emailParam = req.nextUrl.searchParams.get("email")
+  if (emailParam) {
+    const test =
+      emailParam === "test"
+        ? await notifyOwnerNewOrder({
+            external_reference: "PRUEBA",
+            customer_name: "Prueba de notificación",
+            customer_email: "prueba@example.com",
+            customer_phone: "",
+            customer_address: "",
+            customer_city: "",
+            customer_province: "",
+            items: [{ name: "Producto de prueba", quantity: 1, price: 100 }],
+            total: 100,
+          }).catch((e) => ({ sent: false, error: String(e?.message || e) }))
+        : undefined
+    return NextResponse.json({
+      email: {
+        resend_api_key: !!process.env.RESEND_API_KEY,
+        owner_email: !!process.env.OWNER_EMAIL,
+        resend_from: !!process.env.RESEND_FROM,
+      },
+      test,
+    })
   }
 
   const token = process.env.MERCADO_PAGO_ACCESS_TOKEN || ""
