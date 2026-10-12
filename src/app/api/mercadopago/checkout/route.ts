@@ -43,6 +43,9 @@ export async function POST(req: NextRequest) {
       variant_id: line.variant_id,
     }))
 
+    // A MercadoPago solo se le manda el teléfono si es un número
+    const phoneDigits = String(phone || "").replace(/\D/g, "")
+
     const preference = new Preference(mpClient)
     const result = await preference.create({
       body: {
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest) {
         payer: {
           name: name || undefined,
           email: email || undefined,
-          phone: phone ? { number: phone } : undefined,
+          phone: phoneDigits.length >= 6 ? { number: phoneDigits } : undefined,
           address: address ? { street_name: address, street_number: "0", zip_code: postalCode || "" } : undefined,
         },
         back_urls: {
