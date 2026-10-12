@@ -43,8 +43,11 @@ export async function POST(req: NextRequest) {
       variant_id: line.variant_id,
     }))
 
-    // A MercadoPago solo se le manda el teléfono si es un número
+    // A MercadoPago solo se le mandan el teléfono y la dirección si están bien
+    // formados (código postal de 4 dígitos o CPA)
     const phoneDigits = String(phone || "").replace(/\D/g, "")
+    const zipCode = String(postalCode || "").trim()
+    const validZip = /^(\d{4}|[A-Za-z]\d{4}[A-Za-z]{3})$/.test(zipCode)
 
     const preference = new Preference(mpClient)
     const result = await preference.create({
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
           name: name || undefined,
           email: email || undefined,
           phone: phoneDigits.length >= 6 ? { number: phoneDigits } : undefined,
-          address: address ? { street_name: address, street_number: "0", zip_code: postalCode || "" } : undefined,
+          address: address && validZip ? { street_name: address, street_number: "0", zip_code: zipCode } : undefined,
         },
         back_urls: {
           success: `${origin}/checkout/success`,
