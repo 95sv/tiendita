@@ -1,14 +1,27 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAdminStore } from "@/store/admin"
+import { StockBreakdown } from "@/components/admin/stock-breakdown"
 import Link from "next/link"
 import Image from "next/image"
 import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react"
 
+const CATEGORY_FILTERS = [
+  { value: "todos", label: "Todos" },
+  { value: "hombres", label: "Hombres" },
+  { value: "mujeres", label: "Mujeres" },
+  { value: "ofertas", label: "Ofertas" },
+]
+
 export default function AdminProductosPage() {
-  const { products, loading, loadProducts, deleteProduct, toggleActive } =
+  const { products, loading, error, loadProducts, deleteProduct, toggleActive } =
     useAdminStore()
+  const [category, setCategory] = useState("todos")
+
+  const visibleProducts =
+    category === "todos" ? products : products.filter((p) => p.category === category)
+  const totalUnits = visibleProducts.reduce((sum, p) => sum + p.stock, 0)
 
   useEffect(() => {
     loadProducts()
@@ -25,7 +38,7 @@ export default function AdminProductosPage() {
             Gestionar productos
           </h1>
           <p className="mt-1 text-sm text-charcoal/40">
-            {products.length} productos totales
+            {visibleProducts.length} productos · {totalUnits} unidades en stock
           </p>
         </div>
         <Link
@@ -37,6 +50,30 @@ export default function AdminProductosPage() {
         </Link>
       </div>
 
+      <div className="mb-4 flex flex-wrap gap-2">
+        {CATEGORY_FILTERS.map((filter) => (
+          <button
+            key={filter.value}
+            onClick={() => setCategory(filter.value)}
+            className={`px-3 py-1.5 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider border transition-all ${
+              category === filter.value
+                ? "border-charcoal bg-charcoal text-cream"
+                : "border-charcoal/20 text-charcoal/50 hover:border-charcoal/40"
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
+      {error && !loading && (
+        <div className="card-retro mb-4 p-4">
+          <p className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider text-red-600">
+            No se pudieron cargar los datos: {error}
+          </p>
+        </div>
+      )}
+
       {loading && (
         <div className="card-retro p-8 text-center">
           <p className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-wider text-charcoal/40 animate-pulse">
@@ -46,7 +83,7 @@ export default function AdminProductosPage() {
       )}
 
       {!loading && (
-        <div className="card-retro overflow-hidden">
+        <div className="card-retro overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-charcoal/10 bg-cream-dark">
@@ -59,8 +96,8 @@ export default function AdminProductosPage() {
                 <th className="text-left p-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50 hidden md:table-cell">
                   Precio
                 </th>
-                <th className="text-left p-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50 hidden md:table-cell">
-                  Stock
+                <th className="text-left p-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+                  Stock por talle y color
                 </th>
                 <th className="text-left p-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                   Estado
@@ -71,7 +108,7 @@ export default function AdminProductosPage() {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {visibleProducts.map((product) => (
                 <tr
                   key={product.id}
                   className="border-b border-charcoal/5 hover:bg-cream-dark/50 transition-colors"
@@ -107,6 +144,11 @@ export default function AdminProductosPage() {
                     <span className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider text-charcoal/60">
                       {product.category}
                     </span>
+                    {product.categoryTitle && (
+                      <p className="text-[10px] text-charcoal/30 font-[family-name:var(--font-libre)] uppercase">
+                        {product.categoryTitle}
+                      </p>
+                    )}
                   </td>
                   <td className="p-4 hidden md:table-cell">
                     <span className="font-[family-name:var(--font-libre)] text-sm font-medium text-charcoal">
@@ -118,14 +160,15 @@ export default function AdminProductosPage() {
                       </span>
                     )}
                   </td>
-                  <td className="p-4 hidden md:table-cell">
-                    <span
-                      className={`font-[family-name:var(--font-libre)] text-sm ${
+                  <td className="p-4">
+                    <p
+                      className={`mb-2 font-[family-name:var(--font-libre)] text-sm ${
                         product.stock < 10 ? "text-red-600" : "text-charcoal"
                       }`}
                     >
-                      {product.stock}
-                    </span>
+                      {product.stock} <span className="text-[10px] uppercase tracking-wider">en total</span>
+                    </p>
+                    <StockBreakdown variants={product.variants} />
                   </td>
                   <td className="p-4">
                     <button

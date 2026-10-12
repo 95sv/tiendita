@@ -1,5 +1,6 @@
 import type { Product, ProductVariant, Color } from "@/types"
 import { hexForColor } from "@/lib/colors"
+import { sortSizes } from "@/lib/utils"
 
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
 const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
@@ -60,7 +61,9 @@ function medusaToProduct(p: StoreProduct): Product {
   const sizeOption = p.options?.find((o) =>
     ["talle", "size", "talles", "sizes"].includes(o.title.toLowerCase())
   )
-  const sizes = sizeOption?.values?.map((v) => v.value) || (p.variants || []).map((v) => v.title) || []
+  const sizes = sortSizes(
+    sizeOption?.values?.map((v) => v.value) || (p.variants || []).map((v) => v.title) || []
+  )
 
   const colorOption = p.options?.find((o) =>
     ["color", "colores", "colors"].includes(o.title.toLowerCase())

@@ -22,10 +22,11 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 - Cada producto en Medusa tiene opciones `Talle` y `Color`; cada combinación es una variante.
 - `lib/medusa-store.ts` mapea variantes con `inventory_quantity` a `Product.variants[]`.
 - `lib/colors.ts` exporta `COLOR_PALETTE` (12 colores) y `hexForColor(name)`.
-- Admin edita stock vía matriz en `/admin/productos/[id]`; se persiste a Medusa con `updateVariantStock(id, qty, "set")`.
-- Webhook de MercadoPago descuenta stock con `mode: "decrement"` en `POST /store/stock/adjust` (backend), idempotente chequeando `status` previo.
-- Secret: `STOCK_ADJUST_SECRET` en backend `.env` y frontend `.env.local` (server-side, NO `NEXT_PUBLIC_`).
-- Frontend no llama al backend directamente: usa `/api/admin/stock` (Next.js API route) que agrega el secret server-side.
+- El stock vive en los inventory levels de Medusa (uno por variante); si la variante no tiene level, el backend lo crea en la primera stock location.
+- Admin: `/admin/productos` muestra el stock por talle × color; se edita vía matriz en `/admin/productos/[id]` y se persiste con `setVariantsStock(items)` → `POST /admin/stock` (backend, auth admin de Medusa vía el proxy). Los talles/colores se definen al crear el producto; editarlos después no está soportado.
+- Compra: `/api/mercadopago/checkout` resuelve el `variant_id` de cada item (talle + color) y valida stock; el webhook de MercadoPago descuenta con `POST /store/stock` (backend) enviando `reference: external_reference`. El backend guarda la referencia en la metadata del inventory item, así que reintentos del webhook no descuentan dos veces.
+- Las rutas `/store/*` de Medusa exigen el header `x-publishable-api-key`, también las custom.
+- Secret: `STOCK_ADJUST_SECRET` en backend (`.env` y Render) y frontend (`.env.local` y Vercel), server-side, NO `NEXT_PUBLIC_`. Solo lo usa el webhook.
 
 ## Tipos
 - `Product.variants?: ProductVariant[]` (`{ id, size, color, stock }`) — opcional por fallback en `lib/products.ts`.
@@ -39,4 +40,5 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 ## Backend Medusa
 - `admin: { disable: true }` en medusa-config (API funciona, UI deshabilitada).
 - Rate limiting + admin auth en `src/api/middlewares.ts`.
-- Endpoint custom: `src/api/store/stock/route.ts` (POST, auth por secret).
+- Stock: lógica compartida en `src/utils/stock.ts`; `src/api/store/stock/route.ts` (POST, decrementa, auth por secret) y `src/api/admin/stock/route.ts` (POST, fija cantidades, auth admin).
+- Catálogo con stock: `src/api/store/products-stock/route.ts` (solo publicados) y `src/api/admin/products-with-stock/route.ts`.

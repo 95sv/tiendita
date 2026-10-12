@@ -2,6 +2,7 @@
 
 import { create } from "zustand"
 import { hexForColor } from "@/lib/colors"
+import { sortSizes } from "@/lib/utils"
 import {
   fetchProducts,
   createProduct,
@@ -11,7 +12,7 @@ import {
   unpublishProduct,
   fetchCollections,
   fetchCategories,
-  updateVariantStock,
+  setVariantsStock,
   type MedusaProduct,
   type MedusaCollection,
   type MedusaCategory,
@@ -49,7 +50,7 @@ interface AdminStore {
   loadProducts: () => Promise<void>
   loadCollections: () => Promise<void>
   loadCategories: () => Promise<void>
-  addProduct: (product: AdminProduct) => Promise<void>
+  addProduct: (product: AdminProduct) => Promise<{ stockError?: string }>
   updateProduct: (id: string, updates: Partial<AdminProduct>) => Promise<void>
   deleteProduct: (id: string) => Promise<void>
   toggleActive: (id: string) => Promise<void>
@@ -65,7 +66,9 @@ function medusaToAdmin(p: MedusaProduct, storePrices?: Map<string, { calculated:
   const sizeOption = p.options?.find((o) =>
     ["talle", "size", "talles", "sizes"].includes(o.title.toLowerCase())
   )
-  const sizes = sizeOption?.values?.map((v) => v.value) || p.variants?.map((v) => v.title) || []
+  const sizes = sortSizes(
+    sizeOption?.values?.map((v) => v.value) || p.variants?.map((v) => v.title) || []
+  )
 
   const colorOption = p.options?.find((o) =>
     ["color", "colores", "colors"].includes(o.title.toLowerCase())
@@ -222,6 +225,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         status: product.active ? "published" : "draft",
       })
 
+      const stockItems: { variant_id: string; quantity: number }[] = []
       for (const v of created.variants || []) {
         const sizeVal = v.options?.find((o) => {
           const opt = created.options?.find((po) => po.id === o.option_id)
@@ -234,18 +238,30 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         const match = product.variants?.find(
           (pv) => pv.size === sizeVal && pv.color === colorVal
         )
-        if (match) {
-          try {
-            await updateVariantStock(v.id, match.stock, "set")
-          } catch {}
-        }
+        if (match) stockItems.push({ variant_id: v.id, quantity: match.stock })
+      }
+
+      let stockError: string | undefined
+      try {
+        await setVariantsStock(stockItems)
+      } catch (e: any) {
+        stockError = e.message
       }
 
       const adminProduct = medusaToAdmin(created)
-      adminProduct.stock = product.stock
+      if (!stockError) {
+        const stockByVariant = new Map(stockItems.map((i) => [i.variant_id, i.quantity]))
+        adminProduct.variants = adminProduct.variants.map((v) => ({
+          ...v,
+          stock: stockByVariant.get(v.id) ?? 0,
+        }))
+        adminProduct.stock = product.stock
+      }
       set({ products: [...get().products, adminProduct], loading: false })
+      return { stockError }
     } catch (e: any) {
       set({ error: e.message, loading: false })
+      throw e
     }
   },
 
@@ -299,14 +315,15 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
 
         await updateProduct(existing.medusaId, body)
 
-        if (updates.variants && existing.medusaId) {
-          for (const v of updates.variants) {
-            if (v.id) {
-              try {
-                await updateVariantStock(v.id, v.stock, "set")
-              } catch {}
-            }
-          }
+        if (updates.variants) {
+          // Solo las celdas que cambiaron, para no pisar ventas que entraron
+          // mientras el formulario estaba abierto.
+          const previous = new Map(existing.variants.map((v) => [v.id, v.stock]))
+          await setVariantsStock(
+            updates.variants
+              .filter((v) => v.id && previous.get(v.id) !== v.stock)
+              .map((v) => ({ variant_id: v.id, quantity: v.stock }))
+          )
         }
 
         if (updates.price !== undefined || updates.originalPrice !== undefined) {
@@ -348,6 +365,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       })
     } catch (e: any) {
       set({ error: e.message, loading: false })
+      throw e
     }
   },
 

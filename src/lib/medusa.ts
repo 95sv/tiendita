@@ -163,20 +163,14 @@ export async function deleteProduct(id: string): Promise<void> {
   await adminFetch(`/admin/products/${id}`, { method: "DELETE" })
 }
 
-export async function updateVariantStock(
-  variantId: string,
-  quantity: number,
-  mode: "decrement" | "set" = "decrement"
+export async function setVariantsStock(
+  items: { variant_id: string; quantity: number }[]
 ): Promise<void> {
-  const res = await fetch("/api/admin/stock", {
+  if (items.length === 0) return
+  await adminFetch("/admin/stock", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      items: [{ variant_id: variantId, quantity }],
-      mode,
-    }),
+    body: JSON.stringify({ items }),
   })
-  if (!res.ok) throw new Error(`Stock adjust failed: ${res.status}`)
 }
 
 export async function publishProduct(id: string): Promise<MedusaProduct> {

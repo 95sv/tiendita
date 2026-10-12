@@ -3,18 +3,63 @@ import { Preference } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
 import { supabase } from "@/lib/supabase"
 import { notifyOwnerNewOrder } from "@/lib/notify"
+import { getAllProducts } from "@/lib/medusa-store"
+import type { Product } from "@/types"
+
+interface CheckoutItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+  size?: string
+  color?: string
+  variant_id?: string
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, name, email, address, city, postalCode, province, phone, promoCode, discount } = await req.json()
+    const { items, name, email, address, city, postalCode, province, phone, promoCode, discount } =
+      (await req.json()) as { items?: CheckoutItem[] } & Record<string, any>
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items provided" }, { status: 400 })
     }
 
+    // Resuelve la variante (talle + color) de cada item y valida el stock.
+    // Si Medusa no responde a tiempo no se bloquea la venta.
+    const products = await Promise.race([
+      getAllProducts(),
+      new Promise<Product[]>((resolve) => setTimeout(() => resolve([]), 8000)),
+    ])
+    for (const item of items) {
+      const product = products.find((p) => p.id === item.id)
+      const sameSize = product?.variants?.filter((v) => v.size === item.size) || []
+      const variant =
+        product?.variants?.find((v) => v.id === item.variant_id) ??
+        sameSize.find((v) => v.color === (item.color || "Único")) ??
+        (sameSize.length === 1 ? sameSize[0] : undefined)
+      if (!product || !variant) continue
+
+      item.variant_id = variant.id
+      if (variant.stock < item.quantity) {
+        const detail = [`talle ${variant.size}`, variant.color !== "Único" ? variant.color : ""]
+          .filter(Boolean)
+          .join(", ")
+        return NextResponse.json(
+          {
+            error:
+              variant.stock > 0
+                ? `Solo quedan ${variant.stock} de ${product.name} (${detail}).`
+                : `${product.name} (${detail}) no tiene stock.`,
+          },
+          { status: 409 }
+        )
+      }
+    }
+
     const origin = req.headers.get("origin") || "https://laloya.vercel.app"
     const externalRef = `order_${Date.now()}`
-    const subtotal = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0)
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const total = Math.max(0, subtotal - (discount || 0))
 
     const preference = new Preference(mpClient)

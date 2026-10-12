@@ -3,15 +3,20 @@
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useAdminStore } from "@/store/admin"
-import { COLOR_PALETTE } from "@/lib/colors"
-import { ArrowLeft, Upload, X, Plus } from "lucide-react"
+import { hexForColor } from "@/lib/colors"
+import { sortSizes } from "@/lib/utils"
+import { ArrowLeft, Upload, X } from "lucide-react"
 import Link from "next/link"
 
 export default function EditProductoPage() {
   const router = useRouter()
   const params = useParams()
-  const { products, updateProduct } = useAdminStore()
+  const { products, loading, loadProducts, updateProduct } = useAdminStore()
   const product = products.find((p) => p.id === params.id)
+
+  useEffect(() => {
+    if (useAdminStore.getState().products.length === 0) loadProducts()
+  }, [loadProducts])
 
   const [form, setForm] = useState({
     name: "",
@@ -25,10 +30,8 @@ export default function EditProductoPage() {
 
   const [images, setImages] = useState<string[]>([])
   const [imageUrl, setImageUrl] = useState("")
-  const [sizes, setSizes] = useState<string[]>([])
-  const [sizeInput, setSizeInput] = useState("")
-  const [colors, setColors] = useState<{ name: string; hex: string }[]>([])
   const [stockMatrix, setStockMatrix] = useState<Record<string, number>>({})
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (product) {
@@ -42,18 +45,10 @@ export default function EditProductoPage() {
         active: product.active,
       })
       setImages(product.images)
-      setSizes(product.sizes)
-      setColors(product.colors)
 
       const matrix: Record<string, number> = {}
       for (const v of product.variants || []) {
         matrix[`${v.size}__${v.color}`] = v.stock
-      }
-      for (const s of product.sizes) {
-        for (const c of product.colors) {
-          const key = `${s}__${c.name}`
-          if (!(key in matrix)) matrix[key] = 0
-        }
       }
       setStockMatrix(matrix)
     }
@@ -62,13 +57,22 @@ export default function EditProductoPage() {
   if (!product) {
     return (
       <div className="text-center py-20">
-        <p className="text-charcoal/40">Producto no encontrado</p>
+        <p className="text-charcoal/40">
+          {loading ? "Cargando producto..." : "Producto no encontrado"}
+        </p>
         <Link href="/admin/productos" className="text-rust text-sm mt-4 inline-block">
           Volver a productos
         </Link>
       </div>
     )
   }
+
+  const variants = product.variants || []
+  const sizes = sortSizes([...new Set(variants.map((v) => v.size))])
+  const colors = [...new Set(variants.map((v) => v.color))].map((name) => ({
+    name,
+    hex: hexForColor(name),
+  }))
 
   const handleAddImage = () => {
     if (imageUrl.trim()) {
@@ -81,107 +85,52 @@ export default function EditProductoPage() {
     setImages(images.filter((_, i) => i !== index))
   }
 
-  const handleAddSize = () => {
-    if (sizeInput.trim() && !sizes.includes(sizeInput.trim())) {
-      const newSize = sizeInput.trim()
-      setSizes([...sizes, newSize])
-      setSizeInput("")
-      setStockMatrix((prev) => {
-        const next = { ...prev }
-        for (const c of colors) {
-          const key = `${newSize}__${c.name}`
-          if (!(key in next)) next[key] = 0
-        }
-        return next
-      })
-    }
-  }
-
-  const handleRemoveSize = (size: string) => {
-    setSizes(sizes.filter((s) => s !== size))
-    setStockMatrix((prev) => {
-      const next = { ...prev }
-      for (const key of Object.keys(next)) {
-        if (key.startsWith(`${size}__`)) delete next[key]
-      }
-      return next
-    })
-  }
-
-  const handleToggleColor = (color: { name: string; hex: string }) => {
-    const exists = colors.find((c) => c.name === color.name)
-    if (exists) {
-      setColors(colors.filter((c) => c.name !== color.name))
-      setStockMatrix((prev) => {
-        const next = { ...prev }
-        for (const key of Object.keys(next)) {
-          if (key.endsWith(`__${color.name}`)) delete next[key]
-        }
-        return next
-      })
-    } else {
-      setColors([...colors, color])
-      setStockMatrix((prev) => {
-        const next = { ...prev }
-        for (const s of sizes) {
-          const key = `${s}__${color.name}`
-          if (!(key in next)) next[key] = 0
-        }
-        return next
-      })
-    }
-  }
-
   const setStock = (size: string, color: string, val: number) => {
     setStockMatrix((prev) => ({ ...prev, [`${size}__${color}`]: val }))
   }
 
   const totalStock = Object.values(stockMatrix).reduce((a, b) => a + b, 0)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!form.name || !form.price || images.length === 0 || sizes.length === 0) {
+    if (!form.name || !form.price || images.length === 0) {
       alert("Completá todos los campos obligatorios")
       return
     }
 
-    const slug = form.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-
-    const safeColors = colors.length > 0 ? colors : [{ name: "Único", hex: "#000000" }]
-
-    const updatedVariants = (product.variants || []).map((v) => ({
+    const updatedVariants = variants.map((v) => ({
       ...v,
       stock: stockMatrix[`${v.size}__${v.color}`] ?? v.stock,
     }))
 
-    updateProduct(product.id, {
-      name: form.name,
-      description: form.description,
-      price: Number(form.price),
-      originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
-      images,
-      category: form.category,
-      subcategory: form.subcategory || undefined,
-      sizes,
-      colors: safeColors,
-      variants: updatedVariants,
-      slug,
-      discount: form.originalPrice
-        ? Math.round(
-            ((Number(form.originalPrice) - Number(form.price)) /
-              Number(form.originalPrice)) *
-              100
-          )
-        : undefined,
-      stock: totalStock,
-      active: form.active,
-    })
-
-    router.push("/admin/productos")
+    setSaving(true)
+    try {
+      await updateProduct(product.id, {
+        name: form.name,
+        description: form.description,
+        price: Number(form.price),
+        originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
+        images,
+        category: form.category,
+        subcategory: form.subcategory || undefined,
+        variants: updatedVariants,
+        discount: form.originalPrice
+          ? Math.round(
+              ((Number(form.originalPrice) - Number(form.price)) /
+                Number(form.originalPrice)) *
+                100
+            )
+          : undefined,
+        stock: totalStock,
+        active: form.active,
+      })
+      router.push("/admin/productos")
+    } catch (err: any) {
+      alert("No se pudieron guardar los cambios: " + err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -359,82 +308,6 @@ export default function EditProductoPage() {
           </div>
         </div>
 
-        {/* Talles */}
-        <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
-            Talles *
-          </h2>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={sizeInput}
-              onChange={(e) => setSizeInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSize())}
-              className="input-retro flex-1 px-4 py-3 text-sm"
-              placeholder="Ej: S, M, L, XL"
-            />
-            <button
-              type="button"
-              onClick={handleAddSize}
-              className="btn-retro px-4 py-3 text-sm"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-
-          {sizes.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {sizes.map((size) => (
-                <span
-                  key={size}
-                  className="inline-flex items-center gap-1 bg-charcoal text-cream px-3 py-1 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider"
-                >
-                  {size}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSize(size)}
-                    className="hover:text-rust transition-colors"
-                  >
-                    <X size={10} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Colores */}
-        <div className="card-retro p-6 space-y-4">
-          <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
-            Colores
-          </h2>
-
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-            {COLOR_PALETTE.map((color) => {
-              const selected = colors.find((c) => c.name === color.name)
-              return (
-                <button
-                  key={color.name}
-                  type="button"
-                  onClick={() => handleToggleColor(color)}
-                  className={`flex items-center gap-2 px-3 py-2 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider border transition-all ${
-                    selected
-                      ? "border-rust bg-rust/10 text-charcoal"
-                      : "border-charcoal/20 text-charcoal/50 hover:border-charcoal/40"
-                  }`}
-                >
-                  <span
-                    className="w-3 h-3 rounded-full border border-charcoal/20 flex-shrink-0"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                  {color.name}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
         {/* Stock por talle y color */}
         <div className="card-retro p-6 space-y-4">
           <div className="flex items-center justify-between">
@@ -446,9 +319,13 @@ export default function EditProductoPage() {
             </span>
           </div>
 
-          {sizes.length === 0 || colors.length === 0 ? (
+          <p className="text-xs text-charcoal/40">
+            Los talles y colores se definen al crear el producto.
+          </p>
+
+          {variants.length === 0 ? (
             <p className="text-xs text-charcoal/40">
-              Agregá talles y colores para gestionar el stock por variante.
+              Este producto no tiene variantes cargadas.
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -479,6 +356,13 @@ export default function EditProductoPage() {
                       </td>
                       {colors.map((c) => {
                         const key = `${size}__${c.name}`
+                        if (!(key in stockMatrix)) {
+                          return (
+                            <td key={c.name} className="p-2 text-center text-xs text-charcoal/20">
+                              —
+                            </td>
+                          )
+                        }
                         return (
                           <td key={c.name} className="p-2 text-center">
                             <input
@@ -503,8 +387,12 @@ export default function EditProductoPage() {
 
         {/* Submit */}
         <div className="flex gap-4">
-          <button type="submit" className="btn-retro px-8 py-3 text-sm">
-            Guardar cambios
+          <button
+            type="submit"
+            disabled={saving}
+            className="btn-retro px-8 py-3 text-sm disabled:opacity-50"
+          >
+            {saving ? "Guardando..." : "Guardar cambios"}
           </button>
           <Link
             href="/admin/productos"

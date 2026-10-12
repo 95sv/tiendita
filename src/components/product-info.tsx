@@ -28,7 +28,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = () => {
     if (!selectedSize) return
-    addItem(product, selectedSize, selectedColor, selectedVariant?.id)
+    const amount = selectedStock != null ? Math.min(quantity, selectedStock) : quantity
+    addItem(product, selectedSize, selectedColor, selectedVariant?.id, amount)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }

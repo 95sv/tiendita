@@ -123,7 +123,7 @@ export default function NuevoProductoPage() {
         }
       }
 
-      await addProduct({
+      const { stockError } = await addProduct({
         id: Date.now().toString(),
         name: form.name,
         description: form.description,
@@ -147,6 +147,11 @@ export default function NuevoProductoPage() {
         stock: totalStock,
         active: form.active,
       })
+      if (stockError) {
+        alert(
+          `El producto se creó, pero no se pudo guardar el stock (${stockError}). Cargalo desde Editar.`
+        )
+      }
       router.push("/admin/productos")
     } catch (err: any) {
       alert("Error: " + err.message)
