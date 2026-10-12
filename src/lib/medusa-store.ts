@@ -1,4 +1,5 @@
-import type { Product } from "@/types"
+import type { Product, ProductVariant, Color } from "@/types"
+import { hexForColor } from "@/lib/colors"
 
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
 const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
@@ -64,7 +65,27 @@ function medusaToProduct(p: StoreProduct): Product {
   const colorOption = p.options?.find((o) =>
     ["color", "colores", "colors"].includes(o.title.toLowerCase())
   )
-  const colors = colorOption?.values?.map((v) => ({ name: v.value, hex: "#000000" })) || []
+  const colors: Color[] = colorOption?.values?.map((v) => ({
+    name: v.value,
+    hex: hexForColor(v.value),
+  })) || []
+
+  const variants: ProductVariant[] = (p.variants || []).map((v) => {
+    const sizeVal = v.options?.find((o) => {
+      const opt = p.options?.find((po) => po.id === o.option_id)
+      return opt && ["talle", "size", "talles", "sizes"].includes(opt.title.toLowerCase())
+    })?.value || v.title
+    const colorVal = v.options?.find((o) => {
+      const opt = p.options?.find((po) => po.id === o.option_id)
+      return opt && ["color", "colores", "colors"].includes(opt.title.toLowerCase())
+    })?.value || "Único"
+    return {
+      id: v.id,
+      size: sizeVal,
+      color: colorVal,
+      stock: v.inventory_quantity || 0,
+    }
+  })
 
   const catTitle = p.collection?.title?.toLowerCase() || ""
   let category: "hombres" | "mujeres" | "ofertas" = "hombres"
@@ -85,6 +106,7 @@ function medusaToProduct(p: StoreProduct): Product {
     collectionHandle: p.collection?.handle || undefined,
     sizes,
     colors,
+    variants,
     slug: p.handle,
     isNew: false,
     discount:
@@ -101,7 +123,7 @@ function medusaToProduct(p: StoreProduct): Product {
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const res = await fetch(
-      `${MEDUSA_URL}/store/products?limit=100${REGION_ID ? `&region_id=${REGION_ID}` : ""}`,
+      `${MEDUSA_URL}/store/products?limit=100&fields=+variants.inventory_quantity${REGION_ID ? `&region_id=${REGION_ID}` : ""}`,
       {
         headers: { "x-publishable-api-key": API_KEY },
         cache: "no-store",

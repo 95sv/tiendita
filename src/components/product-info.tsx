@@ -18,9 +18,17 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [added, setAdded] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
 
+  const selectedVariant = selectedSize
+    ? product.variants?.find(
+        (v) => v.size === selectedSize && v.color === selectedColor.name
+      )
+    : undefined
+
+  const selectedStock = selectedVariant?.stock ?? null
+
   const handleAddToCart = () => {
     if (!selectedSize) return
-    addItem(product, selectedSize, selectedColor)
+    addItem(product, selectedSize, selectedColor, selectedVariant?.id)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
@@ -75,23 +83,43 @@ export function ProductInfo({ product }: ProductInfoProps) {
           Talle {selectedSize ? `— ${selectedSize}` : ""}
         </label>
         <div className="mt-3 flex flex-wrap gap-2">
-          {product.sizes.map((size) => (
-            <button
-              key={size}
-              onClick={() => setSelectedSize(size)}
-              className={`h-10 min-w-[40px] border-1.5 text-sm font-[family-name:var(--font-libre)] uppercase tracking-wider transition-all ${
-                selectedSize === size
-                  ? "bg-charcoal text-cream border-charcoal shadow-retro-sm"
-                  : "bg-cream border-charcoal/20 hover:border-charcoal text-charcoal"
-              }`}
-            >
-              {size}
-            </button>
-          ))}
+          {product.sizes.map((size) => {
+            const variant = product.variants?.find(
+              (v) => v.size === size && v.color === selectedColor.name
+            )
+            const isOutOfStock = variant != null && variant.stock <= 0
+            return (
+              <button
+                key={size}
+                onClick={() => !isOutOfStock && setSelectedSize(size)}
+                disabled={isOutOfStock}
+                className={`h-10 min-w-[40px] border-1.5 text-sm font-[family-name:var(--font-libre)] uppercase tracking-wider transition-all ${
+                  selectedSize === size
+                    ? "bg-charcoal text-cream border-charcoal shadow-retro-sm"
+                    : isOutOfStock
+                    ? "bg-cream border-charcoal/10 text-charcoal/20 line-through cursor-not-allowed"
+                    : "bg-cream border-charcoal/20 hover:border-charcoal text-charcoal"
+                }`}
+              >
+                {size}
+              </button>
+            )
+          })}
         </div>
         {!selectedSize && (
           <p className="mt-2 text-xs text-rust font-[family-name:var(--font-libre)] uppercase tracking-wider">
             Seleccioná un talle
+          </p>
+        )}
+        {selectedSize && selectedStock !== null && (
+          <p className="mt-2 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider">
+            {selectedStock > 0 ? (
+              <span className="text-charcoal/50">
+                {selectedStock} disponibles
+              </span>
+            ) : (
+              <span className="text-rust">Sin stock</span>
+            )}
           </p>
         )}
       </div>
@@ -111,7 +139,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
             {quantity}
           </span>
           <button
-            onClick={() => setQuantity(quantity + 1)}
+            onClick={() => {
+              const max = selectedStock != null && selectedStock > 0 ? selectedStock : 99
+              setQuantity(Math.min(max, quantity + 1))
+            }}
             className="flex h-10 w-10 items-center justify-center border border-charcoal/20 hover:border-charcoal text-charcoal transition-colors"
           >
             <Plus size={14} />
@@ -122,11 +153,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
       <motion.button
         whileTap={{ scale: 0.98 }}
         onClick={handleAddToCart}
-        disabled={!selectedSize || added}
+        disabled={!selectedSize || added || (selectedStock != null && selectedStock <= 0)}
         className={`flex h-12 w-full items-center justify-center gap-2 font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.1em] transition-all ${
           added
             ? "bg-green-700 text-cream shadow-retro-sm"
-            : selectedSize
+            : selectedSize && (selectedStock == null || selectedStock > 0)
             ? "btn-retro"
             : "bg-charcoal/10 text-charcoal/30 cursor-not-allowed shadow-none"
         }`}

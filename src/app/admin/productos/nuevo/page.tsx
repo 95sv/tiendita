@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAdminStore } from "@/store/admin"
+import { COLOR_PALETTE, UNIQUE_COLOR } from "@/lib/colors"
 import { ArrowLeft, Upload, X, Plus } from "lucide-react"
 import Link from "next/link"
 
@@ -17,8 +18,6 @@ export default function NuevoProductoPage() {
     originalPrice: "",
     category: "hombres" as "hombres" | "mujeres" | "ofertas",
     subcategory: "",
-    stock: "20",
-    slug: "",
     active: true,
   })
 
@@ -27,8 +26,7 @@ export default function NuevoProductoPage() {
   const [sizes, setSizes] = useState<string[]>([])
   const [sizeInput, setSizeInput] = useState("")
   const [colors, setColors] = useState<{ name: string; hex: string }[]>([])
-  const [colorName, setColorName] = useState("")
-  const [colorHex, setColorHex] = useState("#000000")
+  const [stockMatrix, setStockMatrix] = useState<Record<string, number>>({})
 
   const handleAddImage = () => {
     if (imageUrl.trim()) {
@@ -43,26 +41,60 @@ export default function NuevoProductoPage() {
 
   const handleAddSize = () => {
     if (sizeInput.trim() && !sizes.includes(sizeInput.trim())) {
-      setSizes([...sizes, sizeInput.trim()])
+      const newSize = sizeInput.trim()
+      setSizes([...sizes, newSize])
       setSizeInput("")
+      setStockMatrix((prev) => {
+        const next = { ...prev }
+        for (const c of colors) {
+          const key = `${newSize}__${c.name}`
+          if (!(key in next)) next[key] = 0
+        }
+        return next
+      })
     }
   }
 
   const handleRemoveSize = (size: string) => {
     setSizes(sizes.filter((s) => s !== size))
+    setStockMatrix((prev) => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        if (key.startsWith(`${size}__`)) delete next[key]
+      }
+      return next
+    })
   }
 
-  const handleAddColor = () => {
-    if (colorName.trim()) {
-      setColors([...colors, { name: colorName.trim(), hex: colorHex }])
-      setColorName("")
-      setColorHex("#000000")
+  const handleToggleColor = (color: { name: string; hex: string }) => {
+    const exists = colors.find((c) => c.name === color.name)
+    if (exists) {
+      setColors(colors.filter((c) => c.name !== color.name))
+      setStockMatrix((prev) => {
+        const next = { ...prev }
+        for (const key of Object.keys(next)) {
+          if (key.endsWith(`__${color.name}`)) delete next[key]
+        }
+        return next
+      })
+    } else {
+      setColors([...colors, color])
+      setStockMatrix((prev) => {
+        const next = { ...prev }
+        for (const s of sizes) {
+          const key = `${s}__${color.name}`
+          if (!(key in next)) next[key] = 0
+        }
+        return next
+      })
     }
   }
 
-  const handleRemoveColor = (index: number) => {
-    setColors(colors.filter((_, i) => i !== index))
+  const setStock = (size: string, color: string, val: number) => {
+    setStockMatrix((prev) => ({ ...prev, [`${size}__${color}`]: val }))
   }
+
+  const totalStock = Object.values(stockMatrix).reduce((a, b) => a + b, 0)
 
   const [submitting, setSubmitting] = useState(false)
 
@@ -76,6 +108,21 @@ export default function NuevoProductoPage() {
 
     setSubmitting(true)
     try {
+      const safeColors = colors.length > 0 ? colors : [UNIQUE_COLOR]
+      const safeSizes = sizes.length > 0 ? sizes : ["Único"]
+
+      const variants: { id: string; size: string; color: string; stock: number }[] = []
+      for (const s of safeSizes) {
+        for (const c of safeColors) {
+          variants.push({
+            id: `${s}__${c.name}`,
+            size: s,
+            color: c.name,
+            stock: stockMatrix[`${s}__${c.name}`] ?? 0,
+          })
+        }
+      }
+
       await addProduct({
         id: Date.now().toString(),
         name: form.name,
@@ -85,8 +132,9 @@ export default function NuevoProductoPage() {
         images,
         category: form.category,
         subcategory: form.subcategory || undefined,
-        sizes: sizes.length > 0 ? sizes : ["Único"],
-        colors: colors.length > 0 ? colors : [{ name: "Único", hex: "#000000" }],
+        sizes: safeSizes,
+        colors: safeColors,
+        variants,
         slug: form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
         isNew: true,
         discount: form.originalPrice
@@ -96,7 +144,7 @@ export default function NuevoProductoPage() {
                 100
             )
           : undefined,
-        stock: Number(form.stock),
+        stock: totalStock,
         active: form.active,
       })
       router.push("/admin/productos")
@@ -235,13 +283,13 @@ export default function NuevoProductoPage() {
           )}
         </div>
 
-        {/* Precios y stock */}
+        {/* Precio */}
         <div className="card-retro p-6 space-y-4">
           <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
-            Precios y stock
+            Precio
           </h2>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                 Precio ($) *
@@ -267,20 +315,6 @@ export default function NuevoProductoPage() {
                 className="input-retro w-full px-4 py-3 text-sm mt-2"
                 placeholder="0"
                 min="0"
-              />
-            </div>
-            <div>
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Stock *
-              </label>
-              <input
-                type="number"
-                value={form.stock}
-                onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                className="input-retro w-full px-4 py-3 text-sm mt-2"
-                placeholder="0"
-                min="0"
-                required
               />
             </div>
           </div>
@@ -337,60 +371,93 @@ export default function NuevoProductoPage() {
             Colores
           </h2>
 
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Nombre
-              </label>
-              <input
-                type="text"
-                value={colorName}
-                onChange={(e) => setColorName(e.target.value)}
-                className="input-retro w-full px-4 py-3 text-sm mt-2"
-                placeholder="Ej: Negro"
-              />
-            </div>
-            <div>
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Color
-              </label>
-              <input
-                type="color"
-                value={colorHex}
-                onChange={(e) => setColorHex(e.target.value)}
-                className="h-[46px] w-12 mt-2 cursor-pointer border border-charcoal/20"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleAddColor}
-              className="btn-retro px-4 py-3 text-sm"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-
-          {colors.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {colors.map((color, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-2 bg-charcoal text-cream px-3 py-1 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider"
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+            {COLOR_PALETTE.map((color) => {
+              const selected = colors.find((c) => c.name === color.name)
+              return (
+                <button
+                  key={color.name}
+                  type="button"
+                  onClick={() => handleToggleColor(color)}
+                  className={`flex items-center gap-2 px-3 py-2 text-xs font-[family-name:var(--font-libre)] uppercase tracking-wider border transition-all ${
+                    selected
+                      ? "border-rust bg-rust/10 text-charcoal"
+                      : "border-charcoal/20 text-charcoal/50 hover:border-charcoal/40"
+                  }`}
                 >
                   <span
-                    className="w-3 h-3 rounded-full border border-cream/30"
+                    className="w-3 h-3 rounded-full border border-charcoal/20 flex-shrink-0"
                     style={{ backgroundColor: color.hex }}
                   />
                   {color.name}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveColor(i)}
-                    className="hover:text-rust transition-colors"
-                  >
-                    <X size={10} />
-                  </button>
-                </span>
-              ))}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Stock por talle y color */}
+        <div className="card-retro p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
+              Stock por talle y color
+            </h2>
+            <span className="font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider text-charcoal/50">
+              Total: {totalStock}
+            </span>
+          </div>
+
+          {sizes.length === 0 || colors.length === 0 ? (
+            <p className="text-xs text-charcoal/40">
+              Agregá talles y colores para gestionar el stock por variante.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-charcoal/10">
+                    <th className="text-left p-2 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+                      Talle
+                    </th>
+                    {colors.map((c) => (
+                      <th key={c.name} className="text-center p-2 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
+                        <span className="inline-flex items-center gap-1">
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: c.hex }}
+                          />
+                          {c.name}
+                        </span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sizes.map((size) => (
+                    <tr key={size} className="border-b border-charcoal/5">
+                      <td className="p-2 font-[family-name:var(--font-libre)] text-xs uppercase tracking-wider text-charcoal">
+                        {size}
+                      </td>
+                      {colors.map((c) => {
+                        const key = `${size}__${c.name}`
+                        return (
+                          <td key={c.name} className="p-2 text-center">
+                            <input
+                              type="number"
+                              min="0"
+                              value={stockMatrix[key] ?? 0}
+                              onChange={(e) =>
+                                setStock(size, c.name, Math.max(0, parseInt(e.target.value) || 0))
+                              }
+                              className="input-retro w-16 px-2 py-1 text-center text-xs"
+                            />
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

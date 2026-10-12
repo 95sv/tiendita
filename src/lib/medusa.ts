@@ -91,7 +91,7 @@ export function isAdminLoggedIn(): boolean {
 
 export async function fetchProducts(): Promise<MedusaProduct[]> {
   const data = await adminFetch<{ products: MedusaProduct[] }>(
-    "/admin/products?limit=100"
+    "/admin/products?limit=100&fields=+variants.inventory_quantity"
   )
   return data.products
 }
@@ -161,6 +161,23 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<void> {
   await adminFetch(`/admin/products/${id}`, { method: "DELETE" })
+}
+
+export async function updateVariantStock(
+  variantId: string,
+  quantity: number,
+  mode: "decrement" | "set" = "decrement"
+): Promise<void> {
+  const res = await fetch(`${MEDUSA_URL}/store/stock/adjust`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      items: [{ variant_id: variantId, quantity }],
+      mode,
+      secret: process.env.NEXT_PUBLIC_STOCK_ADJUST_SECRET || "",
+    }),
+  })
+  if (!res.ok) throw new Error(`Stock adjust failed: ${res.status}`)
 }
 
 export async function publishProduct(id: string): Promise<MedusaProduct> {

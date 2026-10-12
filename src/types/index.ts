@@ -1,3 +1,10 @@
+export interface ProductVariant {
+  id: string
+  size: string
+  color: string
+  stock: number
+}
+
 export interface Product {
   id: string
   name: string
@@ -11,6 +18,7 @@ export interface Product {
   subcategory?: string
   sizes: string[]
   colors: Color[]
+  variants?: ProductVariant[]
   slug: string
   isNew?: boolean
   discount?: number
@@ -26,6 +34,7 @@ export interface CartItem {
   quantity: number
   size: string
   color: Color
+  variantId?: string
 }
 
 export interface User {

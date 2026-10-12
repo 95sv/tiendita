@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     const preference = new Preference(mpClient)
     const result = await preference.create({
       body: {
-        items: items.map((item: { id: string; name: string; price: number; quantity: number; size?: string }) => ({
+        items: items.map((item: { id: string; name: string; price: number; quantity: number; size?: string; color?: string }) => ({
           id: item.id,
-          title: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+          title: item.name + (item.size ? ` - Talle ${item.size}` : "") + (item.color && item.color !== "Único" ? ` - ${item.color}` : ""),
           quantity: item.quantity,
           unit_price: item.price,
           currency_id: "ARS",
@@ -50,10 +50,11 @@ export async function POST(req: NextRequest) {
           customer_postal_code: postalCode,
           customer_province: province,
           customer_phone: phone,
-          items: JSON.stringify(items.map((item: { name: string; size?: string; quantity: number; price: number }) => ({
-            name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+          items: JSON.stringify(items.map((item: { name: string; size?: string; color?: string; quantity: number; price: number; variant_id?: string }) => ({
+            name: item.name + (item.size ? ` - Talle ${item.size}` : "") + (item.color && item.color !== "Único" ? ` - ${item.color}` : ""),
             quantity: item.quantity,
             price: item.price,
+            variant_id: item.variant_id,
           }))),
         },
       },
@@ -69,10 +70,11 @@ export async function POST(req: NextRequest) {
       customer_city: city,
       customer_province: province,
       customer_postal_code: postalCode,
-      items: items.map((item: { name: string; size?: string; quantity: number; price: number }) => ({
-        name: item.name + (item.size ? ` - Talle ${item.size}` : ""),
+      items: items.map((item: { name: string; size?: string; color?: string; quantity: number; price: number; variant_id?: string }) => ({
+        name: item.name + (item.size ? ` - Talle ${item.size}` : "") + (item.color && item.color !== "Único" ? ` - ${item.color}` : ""),
         quantity: item.quantity,
         price: item.price,
+        variant_id: item.variant_id,
       })),
       total,
       currency: "ARS",

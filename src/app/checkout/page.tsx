@@ -104,6 +104,8 @@ export default function CheckoutPage() {
             price: item.product.price,
             quantity: item.quantity,
             size: item.size,
+            color: item.color.name,
+            variant_id: item.variantId,
           })),
           name: form.name,
           email: form.email,

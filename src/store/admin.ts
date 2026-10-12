@@ -1,6 +1,7 @@
 "use client"
 
 import { create } from "zustand"
+import { hexForColor } from "@/lib/colors"
 import {
   fetchProducts,
   createProduct,
@@ -10,6 +11,7 @@ import {
   unpublishProduct,
   fetchCollections,
   fetchCategories,
+  updateVariantStock,
   type MedusaProduct,
   type MedusaCollection,
   type MedusaCategory,
@@ -26,6 +28,7 @@ export interface AdminProduct {
   subcategory?: string
   sizes: string[]
   colors: { name: string; hex: string }[]
+  variants: { id: string; size: string; color: string; stock: number }[]
   slug: string
   isNew?: boolean
   discount?: number
@@ -67,12 +70,26 @@ function medusaToAdmin(p: MedusaProduct, storePrices?: Map<string, { calculated:
   const colorOption = p.options?.find((o) =>
     ["color", "colores", "colors"].includes(o.title.toLowerCase())
   )
-  const colors = colorOption?.values?.map((v) => ({ name: v.value, hex: "#000000" })) || []
+  const colors = colorOption?.values?.map((v) => ({ name: v.value, hex: hexForColor(v.value) })) || []
 
-  const totalStock = (p.variants || []).reduce(
-    (sum, v) => sum + (v.inventory_quantity || 0),
-    0
-  ) || 50
+  const variants = (p.variants || []).map((v) => {
+    const sizeVal = v.options?.find((o) => {
+      const opt = p.options?.find((po) => po.id === o.option_id)
+      return opt && ["talle", "size", "talles", "sizes"].includes(opt.title.toLowerCase())
+    })?.value || v.title
+    const colorVal = v.options?.find((o) => {
+      const opt = p.options?.find((po) => po.id === o.option_id)
+      return opt && ["color", "colores", "colors"].includes(opt.title.toLowerCase())
+    })?.value || "Único"
+    return {
+      id: v.id,
+      size: sizeVal,
+      color: colorVal,
+      stock: v.inventory_quantity || 0,
+    }
+  })
+
+  const totalStock = variants.reduce((sum, v) => sum + v.stock, 0)
 
   const catTitle = p.collection?.title?.toLowerCase() || ""
   let category: "hombres" | "mujeres" | "ofertas" = "hombres"
@@ -91,9 +108,10 @@ function medusaToAdmin(p: MedusaProduct, storePrices?: Map<string, { calculated:
     subcategory: undefined,
     sizes,
     colors,
+    variants,
     slug: p.handle,
     isNew: false,
-    stock: totalStock || 50,
+    stock: totalStock,
     active: p.status === "published",
     medusaId: p.id,
     collectionId: p.collection_id || undefined,
@@ -158,6 +176,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
     set({ loading: true, error: null })
     try {
       const sizeOption = product.sizes.length > 0 ? product.sizes : ["Único"]
+      const colorOption = product.colors.length > 0 ? product.colors.map((c) => c.name) : ["Único"]
 
       let collectionId: string | undefined
       try {
@@ -179,19 +198,49 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         collectionId = targetColl.id
       } catch {}
 
+      const variants: { title: string; options: Record<string, string>; prices: { amount: number; currency_code: string }[] }[] = []
+      for (const size of sizeOption) {
+        for (const color of colorOption) {
+          variants.push({
+            title: `${color} / ${size}`,
+            options: { Talle: size, Color: color },
+            prices: [{ amount: product.price, currency_code: "ars" }],
+          })
+        }
+      }
+
       const created = await createProduct({
         title: product.name,
         description: product.description,
         collection_id: collectionId,
-        options: [{ title: "Talle", values: sizeOption }],
-        variants: sizeOption.map((s) => ({
-          title: s,
-          options: { Talle: s },
-          prices: [{ amount: product.price, currency_code: "ars" }],
-        })),
+        options: [
+          { title: "Talle", values: sizeOption },
+          { title: "Color", values: colorOption },
+        ],
+        variants,
         images: product.images.map((url) => ({ url })),
         status: product.active ? "published" : "draft",
       })
+
+      for (const v of created.variants || []) {
+        const sizeVal = v.options?.find((o) => {
+          const opt = created.options?.find((po) => po.id === o.option_id)
+          return opt?.title?.toLowerCase() === "talle"
+        })?.value
+        const colorVal = v.options?.find((o) => {
+          const opt = created.options?.find((po) => po.id === o.option_id)
+          return opt?.title?.toLowerCase() === "color"
+        })?.value
+        const match = product.variants?.find(
+          (pv) => pv.size === sizeVal && pv.color === colorVal
+        )
+        if (match) {
+          try {
+            await updateVariantStock(v.id, match.stock, "set")
+          } catch {}
+        }
+      }
+
       const adminProduct = medusaToAdmin(created)
       adminProduct.stock = product.stock
       set({ products: [...get().products, adminProduct], loading: false })
@@ -249,6 +298,16 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         }
 
         await updateProduct(existing.medusaId, body)
+
+        if (updates.variants && existing.medusaId) {
+          for (const v of updates.variants) {
+            if (v.id) {
+              try {
+                await updateVariantStock(v.id, v.stock, "set")
+              } catch {}
+            }
+          }
+        }
 
         if (updates.price !== undefined || updates.originalPrice !== undefined) {
           const newPrice = updates.price ?? existing.price

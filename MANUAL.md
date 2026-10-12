@@ -38,9 +38,20 @@
 - Hacer clic en el ojo (👁) para alternar
 
 ### Actualizar stock
-1. Ir a **Productos** → seleccionar producto
-2. Editar las variantes y actualizar `inventory_quantity`
-3. Guardar
+1. Ir a **Productos** → seleccionar producto → editar
+2. Seleccionar colores desde la paleta (se deselecciona para quitar)
+3. En **Stock por talle y color**, completar la cantidad para cada combinación
+4. El total se calcula automáticamente
+5. Guardar cambios
+
+### Stock automático en pagos
+- Cuando MercadoPago aprueba un pago, el webhook descuenta el stock de cada variante automáticamente
+- Es idempotente: si el mismo pago llega dos veces, solo descuenta una vez
+- El stock nunca baja de 0
+
+### Paleta de colores estándar
+Blanco, Negro, Gris, Azul, Rojo, Verde, Amarillo, Marrón, Rosa, Naranja, Beige, Bordó
+Los hex se resuelven automáticamente desde `lib/colors.ts`.
 
 ### Eliminar un producto
 - Hacer clic en la papelera (🗑) → confirmar

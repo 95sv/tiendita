@@ -27,6 +27,14 @@ export async function POST(req: NextRequest) {
           const metadata = paymentData.metadata || {}
           const items = metadata.items ? JSON.parse(metadata.items) : []
 
+          const { data: existingOrder } = await supabase
+            .from("pedidos")
+            .select("status")
+            .eq("external_reference", paymentData.external_reference)
+            .single()
+
+          const alreadyApproved = existingOrder?.status === "approved"
+
           await supabase.from("pedidos").upsert(
             {
               external_reference: paymentData.external_reference,
@@ -49,6 +57,33 @@ export async function POST(req: NextRequest) {
           )
 
           console.log("Order approved and saved:", paymentData.external_reference)
+
+          if (!alreadyApproved) {
+            const stockItems = items
+              .filter((item: any) => item.variant_id)
+              .map((item: any) => ({
+                variant_id: item.variant_id,
+                quantity: item.quantity,
+              }))
+
+            if (stockItems.length > 0) {
+              try {
+                const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
+                const res = await fetch(`${MEDUSA_URL}/store/stock/adjust`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    items: stockItems,
+                    mode: "decrement",
+                    secret: process.env.NEXT_PUBLIC_STOCK_ADJUST_SECRET || "",
+                  }),
+                })
+                console.log("Stock adjusted:", res.status)
+              } catch (e) {
+                console.error("Stock adjust error:", e)
+              }
+            }
+          }
 
           notifyOwnerNewOrder({
             external_reference: paymentData.external_reference || "",

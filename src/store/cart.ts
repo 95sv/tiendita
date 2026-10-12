@@ -4,7 +4,7 @@ import type { CartItem, Product, Color } from "@/types"
 
 interface CartStore {
   items: CartItem[]
-  addItem: (product: Product, size: string, color: Color) => void
+  addItem: (product: Product, size: string, color: Color, variantId?: string) => void
   removeItem: (productId: string, size: string, colorName: string) => void
   updateQuantity: (productId: string, size: string, colorName: string, quantity: number) => void
   clearCart: () => void
@@ -17,7 +17,7 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, size, color) => {
+      addItem: (product, size, color, variantId) => {
         const items = get().items
         const existing = items.find(
           (item) =>
@@ -37,7 +37,7 @@ export const useCartStore = create<CartStore>()(
             ),
           })
         } else {
-          set({ items: [...items, { product, quantity: 1, size, color }] })
+          set({ items: [...items, { product, quantity: 1, size, color, variantId }] })
         }
       },
 
