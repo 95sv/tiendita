@@ -44,6 +44,17 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 - `/api/send-order-email` arma el email desde el pedido guardado en `pedidos` (por `external_reference`).
 - La URL de pago es `init_point`; `sandbox_init_point` solo se usa si el access token empieza con `TEST-`.
 
+## Descuentos y cupones
+- Descuento por producto: el precio base de las variantes es el precio de lista; el precio con descuento es una price list de Medusa tipo `sale` llamada `Sale - <nombre>`. El panel la crea al alta (`addProduct`) y la reemplaza al editar (`updateProduct`). `AdminProduct.price` es lo que paga el cliente y `originalPrice` el precio tachado. UI compartida en `components/admin/price-fields.tsx`.
+- Cupones: son promociones de Medusa (`type: standard`, `target_type: items`, `allocation: each`) con una regla `items.product.id` `in` [ids] si aplican a productos elegidos, o sin reglas si aplican a todos. Se crean `active`/`inactive` (Medusa crea en `draft` si no se indica).
+- `GET /store/coupons?code=` (backend) valida el cupón y devuelve `{ code, type, value, product_ids }` (`product_ids: null` = todos).
+- El cálculo está en `lib/coupon.ts` y lo usan el checkout del navegador y el servidor: descuento por unidad sobre el precio actual (con oferta incluida), redondeado a pesos y nunca por debajo de $1. El servidor recalcula y cobra en MercadoPago el precio con cupón; si el cupón dejó de valer, rechaza el checkout.
+- Medusa no registra el uso de los cupones (el flujo de compra no usa carritos de Medusa), así que no hay límite de usos.
+
+## Exportación CSV
+- `lib/export-csv.ts`: separador `;`, decimales con coma y BOM, para abrir con doble clic en Excel en español. Neutraliza celdas que empiezan con `= + - @`.
+- Exportan: Productos (una fila por talle y color, respeta el filtro), Pedidos, Clientes, Cupones y Listas de precio.
+
 ## Notificación al dueño
 - `notifyOwnerNewOrder` (`lib/notify.ts`) envía un email con Resend cuando el webhook de MercadoPago aprueba un pago por primera vez (no al crear el checkout). Se espera con `await`: en Vercel una promesa suelta se corta al responder.
 - Variables (Vercel, server-side): `RESEND_API_KEY`, `OWNER_EMAIL` y opcional `RESEND_FROM`. Sin dominio verificado en Resend solo se puede enviar desde `onboarding@resend.dev` hacia el email de la cuenta de Resend.

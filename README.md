@@ -23,7 +23,7 @@ El navegador solo habla con este frontend. Las claves secretas (MercadoPago, Sup
 
 1. **Catálogo.** La tienda pide los productos publicados al backend (`/store/products-stock`), con precio y stock de cada combinación de talle y color.
 2. **Producto y carrito.** El cliente elige talle, color y cantidad. Lo que no tiene stock aparece deshabilitado. El carrito se guarda en el navegador.
-3. **Checkout.** `POST /api/mercadopago/checkout` vuelve a consultar el catálogo y arma el pedido con el precio y el stock del servidor (`lib/checkout.ts`). Si el precio cambió, no hay stock o el catálogo no responde, rechaza la compra con un mensaje. Si está todo bien, crea el pago en MercadoPago, guarda el pedido como `pending` y redirige al cliente.
+3. **Checkout.** Si el cliente ingresa un cupón, la tienda lo valida en el backend (`/store/coupons`) y muestra el descuento en los productos a los que aplica. `POST /api/mercadopago/checkout` vuelve a consultar el catálogo y el cupón, y arma el pedido con el precio y el stock del servidor (`lib/checkout.ts`, `lib/coupon.ts`). Si el precio cambió, no hay stock, el cupón dejó de valer o el catálogo no responde, rechaza la compra con un mensaje. Si está todo bien, crea el pago en MercadoPago con los precios ya descontados, guarda el pedido como `pending` y redirige al cliente.
 4. **Pago.** El cliente paga en MercadoPago.
 5. **Webhook.** MercadoPago llama a `POST /api/webhooks/mercadopago`. La tienda le consulta el pago a MercadoPago con su propia clave (no confía en el contenido del aviso) y, si está aprobado:
    - pasa el pedido a `approved` (una sola vez, aunque el aviso se repita),
@@ -38,7 +38,10 @@ Si el backend está dormido cuando llega el webhook, la tienda responde con erro
 1. **Ingreso.** El admin entra con su usuario de Medusa; el token queda en el navegador y se envía en cada pedido al servidor.
 2. **Productos.** Alta, edición, baja y publicación pasan por `/api/admin/proxy/*`, que reenvía a la API admin de Medusa con el token.
 3. **Stock.** La lista muestra el stock por talle y color. Al editar, la matriz se guarda con `POST /admin/stock` en el backend.
-4. **Pedidos y clientes.** `/api/orders` y `/api/customers` leen Supabase y exigen un token de admin válido (`lib/admin-auth.ts`).
+4. **Descuentos.** Cada producto tiene precio de lista y, opcionalmente, precio con descuento (una lista de precios de Medusa). La tienda muestra el precio tachado y el porcentaje.
+5. **Cupones.** Se crean en Promociones como promociones de Medusa, para todos los productos o para los elegidos, y se activan o desactivan desde ahí.
+6. **Exportación.** Productos, Pedidos, Clientes, Cupones y Listas de precio exportan CSV listo para Excel.
+7. **Pedidos y clientes.** `/api/orders` y `/api/customers` leen Supabase y exigen un token de admin válido (`lib/admin-auth.ts`).
 
 ## Estructura
 
@@ -110,7 +113,7 @@ Cada push a `main` despliega en Vercel. El backend se despliega en Render con ca
 
 ## Pendientes conocidos
 
-- Los códigos de descuento no se validan ni se aplican al cobro.
+- Los cupones no tienen límite de usos ni fecha de vencimiento: se desactivan a mano.
 - No se pueden agregar ni quitar talles o colores de un producto ya creado.
 - El cliente no recibe un email propio de la tienda (requiere dominio verificado en Resend).
 - El costo de envío no se calcula: se coordina con el cliente.

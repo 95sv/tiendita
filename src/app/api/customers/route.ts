@@ -30,10 +30,13 @@ export async function GET(req: NextRequest) {
     const email = order.customer_email
     if (!email) continue
 
+    // Solo suma lo efectivamente cobrado: los pedidos pendientes no se pagaron
+    const paid = order.status === "approved" ? order.total || 0 : 0
+
     const existing = customerMap.get(email)
     if (existing) {
       existing.orders_count++
-      existing.total_spent += order.total || 0
+      existing.total_spent += paid
       if (order.created_at > existing.last_order) {
         existing.last_order = order.created_at
         existing.last_status = order.status
@@ -46,7 +49,7 @@ export async function GET(req: NextRequest) {
         name: order.customer_name || "",
         phone: order.customer_phone || "",
         orders_count: 1,
-        total_spent: order.total || 0,
+        total_spent: paid,
         last_order: order.created_at,
         last_status: order.status,
       })

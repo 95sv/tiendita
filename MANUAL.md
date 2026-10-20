@@ -26,7 +26,7 @@
 
 ### Crear un producto
 1. Ir a **Productos** → **Nuevo producto**
-2. Completar nombre, descripción y precio (en pesos, sin centavos: `14000` es $14.000)
+2. Completar nombre, descripción y precio de lista (en pesos, sin centavos: `14000` es $14.000). Si va con descuento, ver más abajo
 3. Elegir categoría (Hombres, Mujeres u Ofertas) y, si se quiere, subcategoría
 4. Agregar las imágenes por URL
 5. Cargar los talles y elegir los colores de la paleta
@@ -39,6 +39,13 @@ Los talles y colores se definen al crear el producto. Después no se pueden agre
 - **Activo**: visible en la tienda
 - **Inactivo**: oculto de la tienda
 - Hacer clic en el botón de estado para alternar
+
+### Poner un producto con descuento
+1. En **Nuevo producto** o al editar, ir a **Precio y descuento**
+2. Completar el **precio de lista** y, debajo, el **precio con descuento**; o tocar uno de los botones de porcentaje (10%, 20%...) para que se calcule solo
+3. Guardar
+
+La tienda muestra el precio tachado, el precio con descuento y el porcentaje, y el producto aparece en **Ofertas**. Para sacar el descuento: **Quitar descuento** y guardar.
 
 ### Ver y actualizar stock
 - La lista de **Productos** muestra el stock de cada producto por talle y color; lo que está en 0 aparece en rojo. Se puede filtrar por Hombres, Mujeres y Ofertas.
@@ -75,8 +82,10 @@ Blanco, Negro, Gris, Azul, Rojo, Verde, Amarillo, Marrón, Rosa, Naranja, Beige,
 
 Cambiar el estado a mano **no** modifica el stock: si se aprueba o cancela un pedido manualmente, hay que ajustar el stock desde Productos.
 
-### Exportar pedidos a Excel
-- **Exportar CSV** arriba a la derecha; el archivo se abre en Excel
+### Exportar a Excel
+- **Exportar CSV** arriba a la derecha, en Pedidos, Clientes, Productos, Cupones y Listas de precio
+- El archivo se abre con doble clic en Excel, con columnas separadas y tildes correctas
+- Productos exporta una fila por talle y color (respeta el filtro de categoría); Pedidos incluye los productos de cada pedido y el cupón usado
 
 ### Flujo normal de un pedido
 ```
@@ -95,11 +104,29 @@ Es normal que queden pedidos en **Pendiente**: son clientes que llegaron a Merca
 
 ---
 
-## 5. Promociones y Descuentos
+## 5. Cupones de descuento
 
-Los códigos de descuento todavía **no funcionan en la tienda**: se pueden crear desde **Promociones**, pero el checkout no los puede validar ni aplicar al cobro. Hasta que se implemente, no comunicar códigos a clientes.
+### Crear un cupón
+1. Ir a **Promociones** → **Nuevo cupón**
+2. **Código**: lo que va a escribir el cliente, por ejemplo `VERANO20` (letras, números y guiones, sin espacios)
+3. **Tipo**: porcentaje (por ejemplo 20%) o monto fijo por unidad (por ejemplo $1000 menos por cada prenda)
+4. **Aplica a**: todos los productos, o solo los que elijas de la lista
+5. **Estado**: activo para que se pueda usar ya
+6. **Crear cupón**
 
-Para poner un producto en oferta, usar el **precio original** al editarlo: la tienda muestra el precio tachado y el precio de oferta.
+El cliente lo ingresa en el checkout: ve el descuento en los productos a los que aplica y MercadoPago le cobra el precio con descuento. El pedido guarda el cupón y el monto descontado.
+
+### Cómo se calcula
+- Se descuenta por unidad sobre el precio que se está mostrando (si el producto ya está en oferta, el cupón se suma a la oferta).
+- Un producto nunca queda por debajo de $1.
+- Si el cupón no aplica a ningún producto del carrito, el checkout lo rechaza.
+
+### Editar, pausar o borrar
+- Lápiz: cambiar el descuento o los productos (el código no se puede cambiar)
+- Botón de estado: activar o desactivar
+- Papelera: eliminar
+
+Los cupones no tienen límite de usos ni vencimiento: cuando termina la promoción hay que desactivarlo.
 
 ---
 

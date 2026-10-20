@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/utils"
 import { adminApiFetch } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
 import { ShoppingCart, Eye, X, Download } from "lucide-react"
-import { exportToCSV } from "@/lib/export-csv"
+import { csvDate, exportToCSV } from "@/lib/export-csv"
 
 interface SupabaseOrder {
   id: string
@@ -21,6 +21,8 @@ interface SupabaseOrder {
   customer_postal_code: string
   items: { name: string; quantity: number; price: number }[]
   total: number
+  discount?: number
+  promo_code?: string
   currency: string
   payment_method: string
   created_at: string
@@ -206,17 +208,23 @@ export default function PedidosPage() {
         </div>
         <button
           onClick={() => exportToCSV(orders.map((o) => ({
-            "#": o.external_reference,
-            Cliente: o.customer_name || o.customer_email,
-            Email: o.customer_email,
+            Pedido: o.external_reference,
+            Fecha: csvDate(o.created_at),
+            Estado: statusLabels[o.status]?.label || o.status,
+            Cliente: o.customer_name || "",
+            Email: o.customer_email || "",
             Telefono: o.customer_phone || "",
             Direccion: o.customer_address || "",
             Ciudad: o.customer_city || "",
             Provincia: o.customer_province || "",
-            Estado: statusLabels[o.status]?.label || o.status,
+            "Codigo postal": o.customer_postal_code || "",
+            Productos: (o.items || []).map((i) => `${i.name} x${i.quantity}`).join(" | "),
+            Unidades: (o.items || []).reduce((sum, i) => sum + (i.quantity || 0), 0),
+            Cupon: o.promo_code || "",
+            Descuento: o.discount || 0,
             Total: o.total,
-            Metodo: o.payment_method || "",
-            Fecha: new Date(o.created_at).toLocaleDateString("es-AR"),
+            "Medio de pago": o.payment_method || "",
+            "Pago MercadoPago": o.payment_id || "",
           })), "pedidos-la-loya")}
           className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
         >

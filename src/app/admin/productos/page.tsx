@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react"
 import { useAdminStore } from "@/store/admin"
 import { StockBreakdown } from "@/components/admin/stock-breakdown"
+import { exportToCSV } from "@/lib/export-csv"
+import { sortSizes } from "@/lib/utils"
 import Link from "next/link"
 import Image from "next/image"
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react"
+import { Plus, Pencil, Trash2, Eye, EyeOff, Download } from "lucide-react"
 
 const CATEGORY_FILTERS = [
   { value: "todos", label: "Todos" },
@@ -22,6 +24,34 @@ export default function AdminProductosPage() {
   const visibleProducts =
     category === "todos" ? products : products.filter((p) => p.category === category)
   const totalUnits = visibleProducts.reduce((sum, p) => sum + p.stock, 0)
+
+  // Una fila por talle y color, respetando el filtro de categoría
+  const exportProducts = () =>
+    exportToCSV(
+      visibleProducts.flatMap((p) => {
+        const sizeOrder = sortSizes([...new Set(p.variants.map((v) => v.size))])
+        const variants = [...p.variants].sort(
+          (a, b) => a.color.localeCompare(b.color) || sizeOrder.indexOf(a.size) - sizeOrder.indexOf(b.size)
+        )
+        return variants.map((v) => ({
+          Producto: p.name,
+          Categoria: CATEGORY_FILTERS.find((c) => c.value === p.category)?.label || p.category,
+          Coleccion: p.categoryTitle || "",
+          Estado: p.active ? "Activo" : "Inactivo",
+          Talle: v.size,
+          Color: v.color,
+          Stock: v.stock,
+          "Precio de lista": p.originalPrice ?? p.price,
+          "Precio final": p.price,
+          "Descuento %": p.originalPrice
+            ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+            : 0,
+          "ID producto": p.id,
+          "ID variante": v.id,
+        }))
+      }),
+      "productos-la-loya"
+    )
 
   useEffect(() => {
     loadProducts()
@@ -41,13 +71,22 @@ export default function AdminProductosPage() {
             {visibleProducts.length} productos · {totalUnits} unidades en stock
           </p>
         </div>
-        <Link
-          href="/admin/productos/nuevo"
-          className="btn-retro inline-flex items-center gap-2 px-6 py-3 text-sm"
-        >
-          <Plus size={16} />
-          Nuevo producto
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={exportProducts}
+            className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
+          >
+            <Download size={14} />
+            Exportar CSV
+          </button>
+          <Link
+            href="/admin/productos/nuevo"
+            className="btn-retro inline-flex items-center gap-2 px-6 py-3 text-sm"
+          >
+            <Plus size={16} />
+            Nuevo producto
+          </Link>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
@@ -155,9 +194,14 @@ export default function AdminProductosPage() {
                       ${product.price.toLocaleString("es-AR")}
                     </span>
                     {product.originalPrice && (
-                      <span className="text-[10px] text-charcoal/30 line-through ml-2">
-                        ${product.originalPrice.toLocaleString("es-AR")}
-                      </span>
+                      <>
+                        <span className="text-[10px] text-charcoal/30 line-through ml-2">
+                          ${product.originalPrice.toLocaleString("es-AR")}
+                        </span>
+                        <span className="ml-2 px-1.5 py-0.5 text-[10px] font-[family-name:var(--font-libre)] uppercase tracking-wider bg-rust/10 text-rust">
+                          -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                        </span>
+                      </>
                     )}
                   </td>
                   <td className="p-4">

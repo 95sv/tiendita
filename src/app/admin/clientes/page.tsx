@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/utils"
 import { adminApiFetch } from "@/lib/medusa"
 import { EmptyState } from "@/components/admin/empty-state"
 import { Users, Download } from "lucide-react"
-import { exportToCSV } from "@/lib/export-csv"
+import { csvDate, exportToCSV } from "@/lib/export-csv"
 
 interface Customer {
   email: string
@@ -68,9 +68,9 @@ export default function ClientesPage() {
             Email: c.email,
             Telefono: c.phone || "",
             Pedidos: c.orders_count,
-            "Gasto total": c.total_spent,
-            "Ultimo pedido": new Date(c.last_order).toLocaleDateString("es-AR"),
-            Estado: statusLabels[c.last_status]?.label || c.last_status,
+            "Total pagado": c.total_spent,
+            "Ultimo pedido": csvDate(c.last_order),
+            "Estado del ultimo pedido": statusLabels[c.last_status]?.label || c.last_status,
           })), "clientes-la-loya")}
           className="btn-retro px-4 py-2 text-xs flex items-center gap-2"
         >
@@ -87,7 +87,7 @@ export default function ClientesPage() {
               <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40">Email</th>
               <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Telefono</th>
               <th className="text-center py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Pedidos</th>
-              <th className="text-right py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Gasto total</th>
+              <th className="text-right py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden sm:table-cell">Total pagado</th>
               <th className="text-left py-3 px-4 font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/40 hidden md:table-cell">Ultimo pedido</th>
             </tr>
           </thead>

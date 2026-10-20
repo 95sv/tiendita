@@ -1,9 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { fetchPriceLists, createPriceList, deletePriceList, type MedusaPriceList } from "@/lib/medusa"
+import {
+  fetchPriceLists,
+  fetchPriceListPrices,
+  createPriceList,
+  deletePriceList,
+  type MedusaPriceList,
+} from "@/lib/medusa"
+import { useAdminStore } from "@/store/admin"
+import { csvDate, exportToCSV } from "@/lib/export-csv"
 import { EmptyState } from "@/components/admin/empty-state"
-import { BadgeDollarSign, Plus, Trash2, X, Loader2 } from "lucide-react"
+import { BadgeDollarSign, Plus, Trash2, X, Loader2, Download } from "lucide-react"
+
+const typeLabels: Record<string, string> = { sale: "Oferta", override: "Reemplazo" }
+const statusLabels: Record<string, string> = { active: "Activa", draft: "Borrador" }
 
 function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceList) => void; onClose: () => void }) {
   const [name, setName] = useState("")
@@ -74,8 +85,8 @@ function NewPriceListForm({ onCreated, onClose }: { onCreated: (p: MedusaPriceLi
               onChange={(e) => setType(e.target.value)}
               className="input-retro w-full px-4 py-3 text-sm mt-2"
             >
-              <option value="sale">Venta</option>
-              <option value="override">Override</option>
+              <option value="sale">Oferta</option>
+              <option value="override">Reemplazo</option>
             </select>
           </div>
           {error && (
@@ -98,6 +109,42 @@ export default function PreciosPage() {
   const [priceLists, setPriceLists] = useState<MedusaPriceList[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
+  // Una fila por lista, con los productos y precios que incluye
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      if (useAdminStore.getState().products.length === 0) {
+        await useAdminStore.getState().loadProducts()
+      }
+      const productByVariant = new Map(
+        useAdminStore.getState().products.flatMap((p) => p.variants.map((v) => [v.id, p.name] as const))
+      )
+      const rows = []
+      for (const list of priceLists) {
+        const prices = await fetchPriceListPrices(list.id).catch(() => [])
+        const names = [
+          ...new Set(prices.map((pr) => productByVariant.get(pr.price_set?.variant?.id || "") || "")),
+        ].filter(Boolean)
+        const amounts = [...new Set(prices.map((pr) => pr.amount))]
+        rows.push({
+          Lista: list.title,
+          Tipo: typeLabels[list.type] || list.type,
+          Estado: statusLabels[list.status] || list.status,
+          Descripcion: list.description || "",
+          Inicio: csvDate(list.starts_at),
+          Fin: csvDate(list.ends_at),
+          Productos: names.join(" | "),
+          Precios: amounts.map((a) => `${a.toLocaleString("es-AR")}`).join(" | "),
+          "Cantidad de precios": prices.length,
+        })
+      }
+      exportToCSV(rows, "listas-de-precio-la-loya")
+    } finally {
+      setExporting(false)
+    }
+  }
 
   useEffect(() => {
     fetchPriceLists().then((data) => {
@@ -135,10 +182,20 @@ export default function PreciosPage() {
             {priceLists.length} listas configuradas
           </p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-retro px-6 py-3 text-sm flex items-center gap-2">
-          <Plus size={16} />
-          Nueva lista
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="btn-retro px-4 py-2 text-xs flex items-center gap-2 disabled:opacity-50"
+          >
+            {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            Exportar CSV
+          </button>
+          <button onClick={() => setShowForm(true)} className="btn-retro px-6 py-3 text-sm flex items-center gap-2">
+            <Plus size={16} />
+            Nueva lista
+          </button>
+        </div>
       </div>
 
       {priceLists.length === 0 ? (
@@ -160,17 +217,17 @@ export default function PreciosPage() {
               {priceLists.map((list) => (
                 <tr key={list.id} className="border-b border-charcoal/5 hover:bg-charcoal/[0.02] transition-colors">
                   <td className="py-3 px-4">
-                    <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal">{list.name}</p>
+                    <p className="font-[family-name:var(--font-libre)] text-sm text-charcoal">{list.title}</p>
                     {list.description && (
                       <p className="font-[family-name:var(--font-libre)] text-xs text-charcoal/40 mt-0.5">{list.description}</p>
                     )}
                   </td>
                   <td className="py-3 px-4 hidden sm:table-cell">
-                    <span className="font-[family-name:var(--font-libre)] text-xs text-charcoal/60 uppercase">{list.type}</span>
+                    <span className="font-[family-name:var(--font-libre)] text-xs text-charcoal/60 uppercase">{typeLabels[list.type] || list.type}</span>
                   </td>
                   <td className="py-3 px-4 hidden sm:table-cell">
                     <span className={`inline-block px-2 py-0.5 text-xs font-[family-name:var(--font-libre)] uppercase ${list.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}>
-                      {list.status}
+                      {statusLabels[list.status] || list.status}
                     </span>
                   </td>
                   <td className="py-3 px-4 hidden md:table-cell font-[family-name:var(--font-libre)] text-xs text-charcoal/40">
