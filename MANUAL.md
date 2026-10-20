@@ -178,6 +178,9 @@ El cliente tenía el producto en el carrito desde antes de un cambio de precio. 
 1. Verificar en MercadoPago que el pago esté aprobado
 2. Si está aprobado y pasaron varios minutos, cambiar el estado a mano en el admin y ajustar el stock
 
+### MercadoPago no habilita el botón "Pagar"
+MercadoPago Argentina no acepta pagos de menos de $100: con un total menor, ninguna opción de pago se habilita. La tienda ahora avisa antes de salir del checkout. Para probar, usar productos o cupones que dejen el total en $100 o más.
+
 ### MercadoPago muestra "Oh, no, algo anduvo mal" o "Una de las partes es de prueba"
 Se mezclaron cuentas de prueba y reales, o se intentó pagar con el propio vendedor. Con credenciales de prueba hay que pagar con el comprador de prueba, en incógnito. Con credenciales reales hay que pagar con una cuenta real distinta a la del negocio.
 

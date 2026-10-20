@@ -41,6 +41,7 @@ E-commerce full-stack: Next.js frontend + MedusaJS v2 backend + Supabase.
 ## Checkout
 - `resolveCheckoutItems` (`lib/checkout.ts`) arma el pedido con nombre, precio y stock tomados de Medusa. Del navegador solo se toma producto, talle, color y cantidad; nunca usar precios ni descuentos que mande el cliente.
 - Si el catálogo no responde, el checkout se rechaza (no hay precio confiable).
+- MercadoPago Argentina no permite pagos menores a $100 (deja "Pagar" deshabilitado): el checkout rechaza totales menores con `MP_MIN_TOTAL`.
 - `/api/send-order-email` arma el email desde el pedido guardado en `pedidos` (por `external_reference`).
 - La URL de pago es `init_point`; `sandbox_init_point` solo se usa si el access token empieza con `TEST-`.
 

@@ -5,6 +5,11 @@ import { supabase } from "@/lib/supabase"
 import { resolveCheckoutItems } from "@/lib/checkout"
 import { lookupCoupon } from "@/lib/promo"
 import { couponApplies, couponUnitPrice, type Coupon } from "@/lib/coupon"
+import { formatPrice } from "@/lib/utils"
+
+// MercadoPago Argentina no acepta pagos menores a este monto: deja el botón
+// "Pagar" deshabilitado sin explicar por qué
+const MP_MIN_TOTAL = 100
 
 // Verificar el pedido contra Medusa puede tardar si el backend está dormido
 export const maxDuration = 60
@@ -46,6 +51,13 @@ export async function POST(req: NextRequest) {
     )
     const total = lines.reduce((sum, line, index) => sum + unitPrices[index] * line.quantity, 0)
     const discount = subtotal - total
+
+    if (total < MP_MIN_TOTAL) {
+      return NextResponse.json(
+        { error: `El monto mínimo para pagar con MercadoPago es ${formatPrice(MP_MIN_TOTAL)}.` },
+        { status: 409 }
+      )
+    }
 
     const orderItems = lines.map((line, index) => ({
       name: line.name + (line.size ? ` - Talle ${line.size}` : "") + (line.color && line.color !== "Único" ? ` - ${line.color}` : ""),
