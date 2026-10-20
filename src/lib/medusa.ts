@@ -471,6 +471,8 @@ export async function createPriceList(body: {
     // Medusa exige la descripción aunque esté vacía
     description: body.description || "",
     type: body.type,
+    // Sin status Medusa la crea en borrador y los precios no se aplican
+    status: "active",
   }
   if (body.prices) payload.prices = body.prices
   const data = await adminFetch<{ price_list: MedusaPriceList }>("/admin/price-lists", {
