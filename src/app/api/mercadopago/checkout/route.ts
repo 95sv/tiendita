@@ -3,14 +3,15 @@ import { Preference } from "mercadopago"
 import { mpClient } from "@/lib/mercadopago"
 import { supabase } from "@/lib/supabase"
 import { resolveCheckoutItems } from "@/lib/checkout"
-import { lookupPromo, discountFor } from "@/lib/promo"
+import { lookupCoupon } from "@/lib/promo"
+import { couponApplies, couponUnitPrice, type Coupon } from "@/lib/coupon"
 
 // Verificar el pedido contra Medusa puede tardar si el backend está dormido
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, name, email, address, city, postalCode, province, phone, promoCode, discount: claimedDiscount } = await req.json()
+    const { items, name, email, address, city, postalCode, province, phone, promoCode } = await req.json()
 
     const resolved = await resolveCheckoutItems(items)
     if ("error" in resolved) {
@@ -18,27 +19,38 @@ export async function POST(req: NextRequest) {
     }
     const { lines } = resolved
 
+    // El cupón se vuelve a validar acá; del navegador solo se toma el código.
+    // Si dejó de valer no se cobra un total distinto al que vio el cliente.
+    let coupon: Coupon | null = null
+    if (typeof promoCode === "string" && promoCode.trim()) {
+      coupon = await lookupCoupon(promoCode).catch(() => null)
+      if (!coupon) {
+        return NextResponse.json(
+          { error: `El cupón ${promoCode.trim().toUpperCase()} ya no es válido. Quitalo para continuar.` },
+          { status: 409 }
+        )
+      }
+      if (!lines.some((line) => couponApplies(coupon!, line.id))) {
+        return NextResponse.json(
+          { error: "El cupón no aplica a los productos del carrito." },
+          { status: 409 }
+        )
+      }
+    }
+
     const origin = req.headers.get("origin") || "https://laloya.vercel.app"
     const externalRef = `order_${Date.now()}`
     const subtotal = lines.reduce((sum, line) => sum + line.price * line.quantity, 0)
+    const unitPrices = lines.map((line) =>
+      coupon ? couponUnitPrice(coupon, line.id, line.price) : line.price
+    )
+    const total = lines.reduce((sum, line, index) => sum + unitPrices[index] * line.quantity, 0)
+    const discount = subtotal - total
 
-    // El descuento se recalcula acá: lo que manda el navegador solo indica
-    // que el cliente aplicó un código.
-    let discount = 0
-    let appliedCode = ""
-    if (typeof promoCode === "string" && promoCode.trim() && Number(claimedDiscount) > 0) {
-      const result = await lookupPromo(promoCode.trim()).catch(() => null)
-      if (result && "promo" in result) {
-        discount = discountFor(result.promo, subtotal)
-        appliedCode = result.promo.code
-      }
-    }
-    const total = Math.max(0, subtotal - discount)
-
-    const orderItems = lines.map((line) => ({
+    const orderItems = lines.map((line, index) => ({
       name: line.name + (line.size ? ` - Talle ${line.size}` : "") + (line.color && line.color !== "Único" ? ` - ${line.color}` : ""),
       quantity: line.quantity,
-      price: line.price,
+      price: unitPrices[index],
       variant_id: line.variant_id,
     }))
 
@@ -55,7 +67,7 @@ export async function POST(req: NextRequest) {
           id: line.id,
           title: orderItems[index].name,
           quantity: line.quantity,
-          unit_price: line.price,
+          unit_price: unitPrices[index],
           currency_id: "ARS",
         })),
         payer: {
@@ -100,7 +112,7 @@ export async function POST(req: NextRequest) {
       total,
       currency: "ARS",
       payment_method: "",
-      promo_code: appliedCode,
+      promo_code: coupon?.code || "",
       discount,
     })
 

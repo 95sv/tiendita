@@ -286,64 +286,140 @@ export async function fetchOrder(id: string): Promise<MedusaOrder> {
   return data.order
 }
 
+export interface MedusaPromotionRule {
+  id: string
+  attribute: string
+  operator: string
+  values: { value: string }[]
+}
+
 export interface MedusaPromotion {
   id: string
   code: string
   type: string
-  value: number
+  status: "draft" | "active" | "inactive"
   is_automatic: boolean
-  starts_at: string | null
-  ends_at: string | null
   created_at: string
-  updated_at: string
-  status?: string
   application_method?: {
-    type: string
+    type: "percentage" | "fixed"
     value: number
-  }
+    target_type: string
+    target_rules?: MedusaPromotionRule[]
+  } | null
+  rules?: MedusaPromotionRule[]
+}
+
+export interface CouponInput {
+  type: "percentage" | "fixed"
+  value: number
+  // null: todos los productos
+  productIds: string[] | null
+  active: boolean
+}
+
+// Mismo atributo que valida el backend en /store/coupons
+const COUPON_PRODUCT_ATTRIBUTE = "items.product.id"
+
+export function couponProductIds(promo: MedusaPromotion): string[] | null {
+  const rule = promo.application_method?.target_rules?.find(
+    (r) => r.attribute === COUPON_PRODUCT_ATTRIBUTE
+  )
+  return rule ? rule.values.map((v) => v.value) : null
+}
+
+// Las promociones creadas antes de los cupones (sobre el total del pedido,
+// automáticas o con otras reglas) no se pueden usar en la tienda
+export function isStoreCoupon(promo: MedusaPromotion): boolean {
+  const method = promo.application_method
+  const targetRules = method?.target_rules || []
+  return (
+    promo.type === "standard" &&
+    !promo.is_automatic &&
+    method?.target_type === "items" &&
+    (promo.rules || []).length === 0 &&
+    targetRules.every((r) => r.attribute === COUPON_PRODUCT_ATTRIBUTE)
+  )
+}
+
+function productRules(productIds: string[] | null) {
+  return productIds && productIds.length > 0
+    ? [{ attribute: COUPON_PRODUCT_ATTRIBUTE, operator: "in", values: productIds }]
+    : []
 }
 
 export async function fetchPromotions(): Promise<MedusaPromotion[]> {
-  const data = await adminFetch<{ promotions: any[]; count: number }>(
-    "/admin/promotions?limit=100&expand=application_method"
-  )
-  return (data.promotions || []).map((p: any) => ({
-    ...p,
-    value: p.application_method?.value ?? p.value ?? 0,
-    type: p.application_method?.type ?? p.type ?? "standard",
-    status: p.status ?? "active",
-  }))
+  const data = await adminFetch<{ promotions: MedusaPromotion[] }>("/admin/promotions")
+  return data.promotions || []
 }
 
-export async function createPromotion(body: {
-  code: string
-  type: "percentage" | "fixed"
-  value: number
-  is_automatic?: boolean
-  starts_at?: string
-  ends_at?: string
-}): Promise<MedusaPromotion> {
-  const promoBody: any = {
-    code: body.code,
-    type: "standard",
-    application_method: {
-      type: body.type === "percentage" ? "percentage" : "fixed",
-      value: body.value,
-      target_type: "order",
-    },
-  }
-  if (body.is_automatic) promoBody.is_automatic = true
-  const data = await adminFetch<{ promotion: any }>("/admin/promotions", {
+async function fetchPromotion(id: string): Promise<MedusaPromotion> {
+  const data = await adminFetch<{ promotion: MedusaPromotion }>(`/admin/promotions/${id}`)
+  return data.promotion
+}
+
+export async function createCoupon(code: string, input: CouponInput): Promise<MedusaPromotion> {
+  const data = await adminFetch<{ promotion: MedusaPromotion }>("/admin/promotions", {
     method: "POST",
-    body: JSON.stringify(promoBody),
+    body: JSON.stringify({
+      code: code.trim().toUpperCase(),
+      type: "standard",
+      status: input.active ? "active" : "inactive",
+      is_automatic: false,
+      application_method: {
+        type: input.type,
+        value: input.value,
+        target_type: "items",
+        allocation: "each",
+        // Medusa la exige con allocation "each"; el descuento lo calcula la tienda
+        max_quantity: 1000,
+        currency_code: "ars",
+        target_rules: productRules(input.productIds),
+      },
+    }),
   })
-  if (!data.promotion) throw new Error("Error al crear promocion")
-  const p = data.promotion
-  return {
-    ...p,
-    value: p.application_method?.value ?? 0,
-    type: p.application_method?.type ?? p.type ?? "standard",
+  return data.promotion
+}
+
+export async function updateCoupon(
+  promo: MedusaPromotion,
+  input: CouponInput
+): Promise<MedusaPromotion> {
+  await adminFetch(`/admin/promotions/${promo.id}`, {
+    method: "POST",
+    body: JSON.stringify({
+      status: input.active ? "active" : "inactive",
+      application_method: { type: input.type, value: input.value },
+    }),
+  })
+
+  const current = couponProductIds(promo)
+  const next = input.productIds && input.productIds.length > 0 ? input.productIds : null
+  const sameProducts =
+    (current === null && next === null) ||
+    (current !== null &&
+      next !== null &&
+      current.length === next.length &&
+      current.every((id) => next.includes(id)))
+
+  if (!sameProducts) {
+    await adminFetch(`/admin/promotions/${promo.id}/target-rules/batch`, {
+      method: "POST",
+      body: JSON.stringify({
+        create: productRules(next),
+        delete: (promo.application_method?.target_rules || []).map((r) => r.id),
+      }),
+    })
   }
+
+  return fetchPromotion(promo.id)
+}
+
+export async function setPromotionActive(id: string, active: boolean): Promise<MedusaPromotion> {
+  await adminFetch(`/admin/promotions/${id}`, {
+    method: "POST",
+    body: JSON.stringify({ status: active ? "active" : "inactive" }),
+  })
+  return fetchPromotion(id)
 }
 
 export async function deletePromotion(id: string): Promise<void> {
@@ -352,7 +428,7 @@ export async function deletePromotion(id: string): Promise<void> {
 
 export interface MedusaPriceList {
   id: string
-  name: string
+  title: string
   description: string | null
   type: string
   status: string
@@ -368,6 +444,20 @@ export async function fetchPriceLists(): Promise<MedusaPriceList[]> {
   return data.price_lists || []
 }
 
+export interface MedusaPriceListPrice {
+  id: string
+  amount: number
+  currency_code: string
+  price_set?: { variant?: { id: string } | null } | null
+}
+
+export async function fetchPriceListPrices(id: string): Promise<MedusaPriceListPrice[]> {
+  const data = await adminFetch<{ prices: MedusaPriceListPrice[] }>(
+    `/admin/price-lists/${id}/prices`
+  )
+  return data.prices || []
+}
+
 export async function createPriceList(body: {
   name: string
   description?: string
@@ -378,7 +468,8 @@ export async function createPriceList(body: {
 }): Promise<MedusaPriceList> {
   const payload: any = {
     title: body.name,
-    description: body.description,
+    // Medusa exige la descripción aunque esté vacía
+    description: body.description || "",
     type: body.type,
   }
   if (body.prices) payload.prices = body.prices

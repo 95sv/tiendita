@@ -49,6 +49,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
               {formatPrice(product.originalPrice)}
             </span>
           )}
+          {product.discount ? (
+            <span className="badge-retro text-rust border-rust bg-cream">
+              -{product.discount}%
+            </span>
+          ) : null}
         </div>
       </div>
 

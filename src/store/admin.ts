@@ -50,7 +50,7 @@ interface AdminStore {
   loadProducts: () => Promise<void>
   loadCollections: () => Promise<void>
   loadCategories: () => Promise<void>
-  addProduct: (product: AdminProduct) => Promise<{ stockError?: string }>
+  addProduct: (product: AdminProduct) => Promise<{ warnings: string[] }>
   updateProduct: (id: string, updates: Partial<AdminProduct>) => Promise<void>
   deleteProduct: (id: string) => Promise<void>
   toggleActive: (id: string) => Promise<void>
@@ -201,13 +201,17 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         collectionId = targetColl.id
       } catch {}
 
+      // El precio base es el de lista; el de oferta va en una lista de precios aparte
+      const onSale = !!product.originalPrice && product.originalPrice > product.price
+      const listPrice = onSale ? product.originalPrice! : product.price
+
       const variants: { title: string; options: Record<string, string>; prices: { amount: number; currency_code: string }[] }[] = []
       for (const size of sizeOption) {
         for (const color of colorOption) {
           variants.push({
             title: `${color} / ${size}`,
             options: { Talle: size, Color: color },
-            prices: [{ amount: product.price, currency_code: "ars" }],
+            prices: [{ amount: listPrice, currency_code: "ars" }],
           })
         }
       }
@@ -241,15 +245,41 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         if (match) stockItems.push({ variant_id: v.id, quantity: match.stock })
       }
 
-      let stockError: string | undefined
+      const warnings: string[] = []
+      let stockSaved = true
       try {
         await setVariantsStock(stockItems)
       } catch (e: any) {
-        stockError = e.message
+        stockSaved = false
+        warnings.push(`no se pudo guardar el stock (${e.message}); cargalo desde Editar`)
+      }
+
+      let saleSaved = false
+      if (onSale) {
+        try {
+          const { createPriceList: cpl } = await import("@/lib/medusa")
+          await cpl({
+            name: `Sale - ${product.name}`,
+            description: `Descuento para ${product.name}`,
+            type: "sale",
+            prices: (created.variants || []).map((v) => ({
+              variant_id: v.id,
+              amount: product.price,
+              currency_code: "ars",
+            })),
+          })
+          saleSaved = true
+        } catch (e: any) {
+          warnings.push(`no se pudo guardar el descuento (${e.message}); cargalo desde Editar`)
+        }
       }
 
       const adminProduct = medusaToAdmin(created)
-      if (!stockError) {
+      if (saleSaved) {
+        adminProduct.price = product.price
+        adminProduct.originalPrice = listPrice
+      }
+      if (stockSaved) {
         const stockByVariant = new Map(stockItems.map((i) => [i.variant_id, i.quantity]))
         adminProduct.variants = adminProduct.variants.map((v) => ({
           ...v,
@@ -258,7 +288,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         adminProduct.stock = product.stock
       }
       set({ products: [...get().products, adminProduct], loading: false })
-      return { stockError }
+      return { warnings }
     } catch (e: any) {
       set({ error: e.message, loading: false })
       throw e
@@ -328,7 +358,8 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
 
         if (updates.price !== undefined || updates.originalPrice !== undefined) {
           const newPrice = updates.price ?? existing.price
-          const newOriginal = updates.originalPrice ?? existing.originalPrice
+          // "originalPrice" presente y vacío significa que se quitó el descuento
+          const newOriginal = "originalPrice" in updates ? updates.originalPrice : existing.originalPrice
           const productName = updates.name ?? existing.name
           const saleChanged =
             newPrice !== existing.price ||

@@ -16,7 +16,7 @@ export default function AdminDashboard() {
     loadProducts()
     adminApiFetch("/api/orders").then((r) => (r.ok ? r.json() : [])).then((o) => setOrderCount(o.length)).catch(() => {})
     fetchCustomers().then((c) => setCustomerCount(c.length)).catch(() => {})
-    fetchPromotions().then((p) => setPromoCount(p.length)).catch(() => {})
+    fetchPromotions().then((p) => setPromoCount(p.filter((x) => x.status === "active").length)).catch(() => {})
   }, [loadProducts])
 
   const totalProducts = products.length

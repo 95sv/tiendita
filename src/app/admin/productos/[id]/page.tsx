@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { useAdminStore } from "@/store/admin"
 import { hexForColor } from "@/lib/colors"
 import { sortSizes } from "@/lib/utils"
+import { PriceFields, priceError, pricesFromFields } from "@/components/admin/price-fields"
 import { ArrowLeft, Upload, X } from "lucide-react"
 import Link from "next/link"
 
@@ -21,8 +22,8 @@ export default function EditProductoPage() {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    price: "",
-    originalPrice: "",
+    listPrice: "",
+    salePrice: "",
     category: "hombres" as "hombres" | "mujeres" | "ofertas",
     subcategory: "",
     active: true,
@@ -38,8 +39,8 @@ export default function EditProductoPage() {
       setForm({
         name: product.name,
         description: product.description,
-        price: product.price.toString(),
-        originalPrice: product.originalPrice?.toString() || "",
+        listPrice: (product.originalPrice ?? product.price).toString(),
+        salePrice: product.originalPrice ? product.price.toString() : "",
         category: product.category as "hombres" | "mujeres" | "ofertas",
         subcategory: product.subcategory || "",
         active: product.active,
@@ -94,10 +95,17 @@ export default function EditProductoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!form.name || !form.price || images.length === 0) {
+    if (!form.name || images.length === 0) {
       alert("Completá todos los campos obligatorios")
       return
     }
+
+    const pricingError = priceError(form.listPrice, form.salePrice)
+    if (pricingError) {
+      alert(pricingError)
+      return
+    }
+    const pricing = pricesFromFields(form.listPrice, form.salePrice)
 
     const updatedVariants = variants.map((v) => ({
       ...v,
@@ -109,19 +117,13 @@ export default function EditProductoPage() {
       await updateProduct(product.id, {
         name: form.name,
         description: form.description,
-        price: Number(form.price),
-        originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
+        price: pricing.price,
+        originalPrice: pricing.originalPrice,
         images,
         category: form.category,
         subcategory: form.subcategory || undefined,
         variants: updatedVariants,
-        discount: form.originalPrice
-          ? Math.round(
-              ((Number(form.originalPrice) - Number(form.price)) /
-                Number(form.originalPrice)) *
-                100
-            )
-          : undefined,
+        discount: pricing.discount,
         stock: totalStock,
         active: form.active,
       })
@@ -254,36 +256,14 @@ export default function EditProductoPage() {
         {/* Precios */}
         <div className="card-retro p-6 space-y-4">
           <h2 className="font-[family-name:var(--font-libre)] text-sm uppercase tracking-[0.15em] text-charcoal">
-            Precios
+            Precio y descuento
           </h2>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Precio ($) *
-              </label>
-              <input
-                type="number"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                className="input-retro w-full px-4 py-3 text-sm mt-2"
-                min="0"
-                required
-              />
-            </div>
-            <div>
-              <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
-                Precio original ($)
-              </label>
-              <input
-                type="number"
-                value={form.originalPrice}
-                onChange={(e) => setForm({ ...form, originalPrice: e.target.value })}
-                className="input-retro w-full px-4 py-3 text-sm mt-2"
-                min="0"
-              />
-            </div>
-          </div>
+          <PriceFields
+            listPrice={form.listPrice}
+            salePrice={form.salePrice}
+            onChange={(next) => setForm({ ...form, ...next })}
+          />
 
           <div className="flex items-center gap-3">
             <label className="font-[family-name:var(--font-libre)] text-[10px] uppercase tracking-[0.2em] text-charcoal/50">

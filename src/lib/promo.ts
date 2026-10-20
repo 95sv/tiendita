@@ -1,45 +1,21 @@
+import type { Coupon } from "@/lib/coupon"
+
 const MEDUSA_URL = process.env.NEXT_PUBLIC_MEDUSA_URL || "https://la-loya-backend.onrender.com"
 const API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_API_KEY || ""
 
-export interface Promo {
-  code: string
-  type: string
-  value: number
-}
-
-export async function lookupPromo(code: string): Promise<{ promo: Promo } | { error: string }> {
+// Devuelve el cupón si existe y está vigente, o null si no es válido
+export async function lookupCoupon(code: string): Promise<Coupon | null> {
   const res = await fetch(
-    `${MEDUSA_URL}/store/promotions?code=${encodeURIComponent(code)}`,
+    `${MEDUSA_URL}/store/coupons?code=${encodeURIComponent(code.trim().toUpperCase())}`,
     {
-      headers: {
-        "Content-Type": "application/json",
-        "x-publishable-api-key": API_KEY,
-      },
+      headers: { "x-publishable-api-key": API_KEY },
+      cache: "no-store",
     }
   )
 
-  if (!res.ok) {
-    return { error: "Codigo invalido" }
-  }
+  if (res.status === 400 || res.status === 404) return null
+  if (!res.ok) throw new Error(`Coupon lookup failed: ${res.status}`)
 
   const data = await res.json()
-  const promo = data.promotions?.[0]
-
-  if (!promo || promo.status !== "active") {
-    return { error: "Codigo invalido o inactivo" }
-  }
-
-  const method = promo.application_method
-  if (!method) {
-    return { error: "Promocion sin metodo de aplicacion" }
-  }
-
-  return { promo: { code: promo.code, type: method.type, value: method.value } }
-}
-
-export function discountFor(promo: Promo, subtotal: number): number {
-  if (promo.type === "percentage") {
-    return Math.round((subtotal * promo.value) / 100)
-  }
-  return Math.min(promo.value, subtotal)
+  return data.coupon ?? null
 }

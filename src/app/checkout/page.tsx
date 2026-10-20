@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useCartStore } from "@/store/cart"
 import { formatPrice } from "@/lib/utils"
+import { couponApplies, couponDiscount, couponLabel, couponUnitPrice, type Coupon } from "@/lib/coupon"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 
@@ -12,7 +13,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("mp")
   const [promoCode, setPromoCode] = useState("")
-  const [promoDiscount, setPromoDiscount] = useState<{ type: string; value: number } | null>(null)
+  const [coupon, setCoupon] = useState<Coupon | null>(null)
   const [promoLoading, setPromoLoading] = useState(false)
   const [promoError, setPromoError] = useState("")
   const [form, setForm] = useState({
@@ -32,28 +33,40 @@ export default function CheckoutPage() {
     if (!promoCode.trim()) return
     setPromoLoading(true)
     setPromoError("")
-    setPromoDiscount(null)
+    setCoupon(null)
     try {
       const res = await fetch(`/api/promo/validate?code=${encodeURIComponent(promoCode.trim())}`)
       const data = await res.json()
-      if (data.valid) {
-        setPromoDiscount({ type: data.type, value: data.value })
+      if (!data.valid) {
+        setPromoError(data.error || "Cupón inválido")
+      } else if (!items.some((item) => couponApplies(data.coupon, item.product.id))) {
+        setPromoError("Este cupón no aplica a los productos de tu carrito")
       } else {
-        setPromoError(data.error || "Codigo invalido")
+        setCoupon(data.coupon)
       }
     } catch {
-      setPromoError("Error al validar codigo")
+      setPromoError("Error al validar el cupón")
     } finally {
       setPromoLoading(false)
     }
   }
 
+  const removeCoupon = () => {
+    setCoupon(null)
+    setPromoCode("")
+    setPromoError("")
+  }
+
   const getDiscount = () => {
-    if (!promoDiscount) return 0
-    if (promoDiscount.type === "percentage") {
-      return Math.round(getTotal() * promoDiscount.value / 100)
-    }
-    return Math.min(promoDiscount.value, getTotal())
+    if (!coupon) return 0
+    return couponDiscount(
+      coupon,
+      items.map((item) => ({
+        product_id: item.product.id,
+        price: item.product.price,
+        quantity: item.quantity,
+      }))
+    )
   }
 
   const getFinalTotal = () => {
@@ -114,8 +127,7 @@ export default function CheckoutPage() {
           city: form.city,
           postalCode: form.postalCode,
           province: form.province,
-          promoCode: promoCode || undefined,
-          discount: getDiscount() || undefined,
+          promoCode: coupon?.code,
         }),
       })
 
@@ -288,34 +300,58 @@ export default function CheckoutPage() {
                         {item.size} x{item.quantity}
                       </p>
                     </div>
-                    <span className="font-[family-name:var(--font-libre)] text-xs font-medium text-charcoal">
-                      {formatPrice(item.product.price * item.quantity)}
+                    <span className="text-right font-[family-name:var(--font-libre)] text-xs font-medium text-charcoal">
+                      {coupon && couponApplies(coupon, item.product.id) ? (
+                        <>
+                          <span className="block text-[10px] text-charcoal/30 line-through">
+                            {formatPrice(item.product.price * item.quantity)}
+                          </span>
+                          <span className="text-green-700">
+                            {formatPrice(
+                              couponUnitPrice(coupon, item.product.id, item.product.price) * item.quantity
+                            )}
+                          </span>
+                        </>
+                      ) : (
+                        formatPrice(item.product.price * item.quantity)
+                      )}
                     </span>
                   </div>
                 ))}
               </div>
               <div className="mt-4 border-t border-charcoal/10 pt-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Codigo de descuento"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    className="input-retro flex-1 px-3 py-2 text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={applyPromoCode}
-                    disabled={promoLoading}
-                    className="btn-retro px-4 py-2 text-xs"
-                  >
-                    {promoLoading ? "..." : "Aplicar"}
-                  </button>
-                </div>
-                {promoDiscount && (
-                  <p className="mt-2 text-xs text-green-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">
-                    Descuento aplicado: {promoDiscount.type === "percentage" ? `${promoDiscount.value}%` : `$${promoDiscount.value.toLocaleString("es-AR")}`}
-                  </p>
+                {coupon ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-green-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">
+                      Cupón {coupon.code}: {couponLabel(coupon)} de descuento
+                      {coupon.product_ids !== null && " en productos seleccionados"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={removeCoupon}
+                      className="text-[10px] text-charcoal/40 hover:text-rust font-[family-name:var(--font-libre)] uppercase tracking-wider"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Cupón de descuento"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                      className="input-retro flex-1 px-3 py-2 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyPromoCode}
+                      disabled={promoLoading}
+                      className="btn-retro px-4 py-2 text-xs"
+                    >
+                      {promoLoading ? "..." : "Aplicar"}
+                    </button>
+                  </div>
                 )}
                 {promoError && (
                   <p className="mt-2 text-xs text-red-600 font-[family-name:var(--font-libre)] uppercase tracking-wider">
@@ -330,7 +366,7 @@ export default function CheckoutPage() {
                     {formatPrice(getTotal())}
                   </span>
                 </div>
-                {promoDiscount && (
+                {coupon && (
                   <div className="flex justify-between">
                     <span className="text-green-600">Descuento</span>
                     <span className="font-[family-name:var(--font-libre)] text-green-600">
