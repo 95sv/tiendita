@@ -101,7 +101,7 @@ npm run build
 
 ## Deploy
 
-Cada push a `main` despliega en Vercel. El backend se despliega en Render con cada push a `main` de su repositorio. Si un cambio toca los dos, desplegar primero el backend.
+Cada push a `main` despliega en Vercel. El backend en Render tiene deploy manual: después de subir a `main` hay que entrar a Render → `la-loya-backend` → **Manual Deploy** → **Deploy latest commit**. Si un cambio toca los dos, desplegar primero el backend.
 
 ## Seguridad
 
